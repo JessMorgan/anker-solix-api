@@ -2542,7 +2542,7 @@ _EV_CHARGER_0405 = {
     "d9": {NAME: "solar_evcharge_mode"},  # solar & grid (0), solar only (1)
     "da": {NAME: "solar_evcharge_min_current"},  # 6 - rated_current (32 A), step 1 A
     "db": {NAME: "phase_operating_mode"},  # 1 phase (1), 3 phase (3) ???
-    "dc": {NAME: "solar_evcharge_monitoring_mode?"},
+    "dc": {NAME: "solar_evcharge_monitoring_mode"},
     "dd": {
         NAME: "auto_phase_switch"
     },  # Off (0), On (1), only awailable in 3 phase mode

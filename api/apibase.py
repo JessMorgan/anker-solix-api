@@ -813,6 +813,7 @@ class AnkerSolixBaseApi:
                                 "ocpp_connect_status",
                                 "cp_signal_status",
                                 "plug_status",
+                                "solar_evcharge_monitoring_mode",
                             ]
                             and value is not None
                         ):
