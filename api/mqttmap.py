@@ -1929,6 +1929,157 @@ _A17E1_040a = {
     "fe": {NAME: "msg_timestamp"},
 }
 
+# AX170 Power dock for home backup systems A17E1
+_AX170_0405 = {
+    TOPIC: "param_info",
+    "a2": {NAME: "device_sn"},
+    "a6": {NAME: "battery_soc_total"},  # Average SOC of all devices in system
+    "ab": {NAME: "pv_1_power"},
+    "ac": {NAME: "battery_power"},
+    "ad": {NAME: "solar_to_home_power?"},
+    "ae": {NAME: "solar_to_home_power_inv?"},
+    "b5": {NAME: "backup_soc_limit?"},
+    "b7": {NAME: "max_soc_limit?"},
+    "b9": {NAME: "home_load_preset?"},
+    "bf": {NAME: "timestamp_0405_bf?"},
+    "c0": {NAME: "timestamp_0405_c0?"},
+    "c3": {
+        NAME: "use_time_band?"
+    },  # use_time_band: 1=peak, 2=mid-peak, 3=off-peak, 4=super-off-peak
+    "c4": {NAME: "grid_power_signed"},  # positive=import, negative=export
+    "c5": {NAME: "home_load?"},
+    "c6": {NAME: "pv_1_power?"},
+    "c7": {NAME: "pv_2_power?"},
+    "cd": {NAME: "home_demand?"},
+    "dd": {NAME: "display_timeout_seconds"},
+    "de": {NAME: "max_load_limit_total?"},
+    "e4": {
+        BYTES: {
+            "00": {
+                NAME: "home_demand_circuit_01",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "04": {
+                NAME: "home_demand_circuit_02",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "08": {
+                NAME: "home_demand_circuit_03",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "12": {
+                NAME: "home_demand_circuit_04",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "16": {
+                NAME: "home_demand_circuit_05",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "20": {
+                NAME: "home_demand_circuit_06",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "24": {
+                NAME: "home_demand_circuit_07",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "28": {
+                NAME: "home_demand_circuit_08",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "32": {
+                NAME: "home_demand_circuit_09",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "36": {
+                NAME: "home_demand_circuit_10",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "40": {
+                NAME: "home_demand_circuit_11",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "44": {
+                NAME: "home_demand_circuit_12",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+        }
+    },
+    "e8": {
+        BYTES: {
+            "00": {
+                NAME: "device_1_pn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+            "11": {
+                NAME: "device_1_sn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+        }
+    },
+    "e9": {
+        BYTES: {
+            "00": {
+                NAME: "device_2_pn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+            "11": {
+                NAME: "device_2_sn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+        }
+    },
+    "ea": {
+        BYTES: {
+            "00": {
+                NAME: "device_3_pn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+            "11": {
+                NAME: "device_3_sn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+        }
+    },
+    "eb": {
+        BYTES: {
+            "00": {
+                NAME: "device_4_pn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+            "11": {
+                NAME: "device_4_sn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+        }
+    },
+    "ec": {
+        BYTES: {
+            "00": {
+                NAME: "device_5_pn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+            "11": {
+                NAME: "device_5_sn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+        }
+    },
+    "ed": {
+        BYTES: {
+            "00": {
+                NAME: "device_6_pn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+            "11": {
+                NAME: "device_6_sn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+        }
+    },
+    "fe": {NAME: "msg_timestamp"},
+}
+
 # 250W Prime Charger
 _A2345_0303 = {
     TOPIC: "state_info",
@@ -3442,8 +3593,8 @@ SOLIXMQTTMAP: Final[dict] = {
             "c3": {
                 NAME: "use_time_band?"
             },  # use_time_band: 1=peak, 2=mid-peak, 3=off-peak, 4=super-off-peak
-            "c4": {NAME: "grid_power"},  # signed?
-            "c5": {NAME: "home_demand"},
+            "c4": {NAME: "grid_power_signed"},  # positive=import, negative=export
+            "c5": {NAME: "home_load?"},
             "c6": {NAME: "pv_1_power?"},
             "c7": {NAME: "pv_2_power?"},
             "af": {
@@ -3453,13 +3604,13 @@ SOLIXMQTTMAP: Final[dict] = {
                 BYTES: {
                     "02": {
                         NAME: "storm_guard_switch",
-                        TYPE: DeviceHexDataTypes.ui.value,
+                        MASK: 0x01,
                     },  # 0=off, 1=on
                 }
             },
             "c2": {
-                NAME: "generator_output_power_total?"
-            },  # total generator AC output W
+                NAME: "ac_output_power?"
+            },  # total AC output power to home from all sources in W (solar, battery, generator, grid)
             "cb": {NAME: "expansion_packs?"},  # number of expansion batteries
             "d5": {
                 NAME: "generator_to_battery_power?"
@@ -3485,6 +3636,11 @@ SOLIXMQTTMAP: Final[dict] = {
         },
         # Interval: ~3-5 seconds, but only with realtime trigger
         "040a": _A17E1_040a,
+    },
+    # AX170 Power dock for home backup systems A17E1
+    "AX170": {
+        "0057": CMD_REALTIME_TRIGGER,  # for regular status messages 0405 etc
+        "0405": _AX170_0405,
     },
     # Anker Solarbank Smartmeter
     "A17X7": {
