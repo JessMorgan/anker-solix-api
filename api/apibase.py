@@ -599,6 +599,9 @@ class AnkerSolixBaseApi:
                                 "grid_to_battery_power",
                                 "home_demand",
                                 "home_demand_total",
+                                "generator_to_battery_power",
+                                "generator_to_home_power",
+                                "generator_power",
                                 "charge_priority_limit",
                                 "pv_limit",
                                 "pv_limit_solarbank_1",
@@ -716,6 +719,9 @@ class AnkerSolixBaseApi:
                             "grid_charged_today",
                             "grid_consumption_today",
                             "home_consumption_today",
+                            "generator_energy_today",
+                            "generator_charged_today",
+                            "generator_consumed_today",
                         ]:
                             # aggregated energies should never decrease, otherwise weird values are sent or description is wrong
                             # 0 value should be ignored for aggregated, since that may reset energy counters if 0 values read on startup
@@ -826,6 +832,8 @@ class AnkerSolixBaseApi:
                                 "cp_signal_status",
                                 "plug_status",
                                 "solar_evcharge_monitoring_mode",
+                                "working_status",
+                                "mode",
                             ]
                             and value is not None
                         ):

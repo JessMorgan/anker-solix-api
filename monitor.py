@@ -35,6 +35,7 @@ from api.apitypes import (  # pylint: disable=no-name-in-module
     SolixEvChargerSolarMode,
     SolixEvChargerStatus,
     SolixEvChargerWipeMode,
+    SolixMode,
     SolixOcppConnectionStatus,
     SolixPhaseMode,
     SolixPlantStatus,
@@ -51,6 +52,7 @@ from api.apitypes import (  # pylint: disable=no-name-in-module
     SolixSwitchMode,
     SolixSwitchModeV2,
     SolixVehicle,
+    SolixWorkingStatus,
 )
 from api.errors import AnkerSolixError  # pylint: disable=no-name-in-module
 from api.helpers import get_enum_name  # pylint: disable=no-name-in-module
@@ -1304,6 +1306,14 @@ class AnkerSolixApiMonitor:
                         f"{'Battery Status':<{col1}}: {str(m2) and (c or cm)}"
                         f"{get_enum_name(SolixBatteryStatus, str(m2), 'unknown' if str(m2) else '-----').capitalize() + ' (' + (str(m2) or '-') + ')'}{co} "
                     )
+                m1 = cm and mqtt.get("working_status", "")
+                m2 = cm and mqtt.get("mode", "")
+                if str(m1) or str(m2):
+                    CONSOLE.info(
+                        f"{'Work Status':<{col1}}: {str(m1) and (c or cm)}{get_enum_name(SolixWorkingStatus, str(m1), 'unknown' if str(m1) else '-----').capitalize() + ' (' + (str(m1) or '-') + ')':<12}{'':<{col2 - 12}}{co} "
+                        f"{'Mode':<{col1}}: {str(m2) and (c or cm)}"
+                        f"{get_enum_name(SolixMode, str(m2), 'unknown' if str(m2) else '-----').capitalize() + ' (' + (str(m2) or '-') + ')'}{co} "
+                    )
                 if m1 := cm and mqtt.get("last_update", ""):
                     m2 = cm and mqtt.get("local_time", "")
                     CONSOLE.info(
@@ -1311,41 +1321,60 @@ class AnkerSolixApiMonitor:
                         f"{'Local Time':<{col3}}: {m2 and (c or cm)}{m2}{co}"
                     )
                 unit = "W"
+                avg = dev.get("average_power") or {}
                 if m1 := cm and mqtt.get("photovoltaic_power", ""):
                     m2 = cm and mqtt.get("pv_to_home_power", "")
                     m3 = cm and mqtt.get("pv_yield", "")
                     CONSOLE.info(
                         f"{'Solar Power':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit}{m3 and (c or cm)}{((' (' + m3 + ' kWh)') if m3 else ''):<{col2 - 7}}{co} "
-                        f"{'PV -> Home Pwr':<{col3}}: {m2 and (c or cm)}{m2:>5} {unit}{co}"
+                        f"{'PV -> Home Pwr':<{col3}}: {m2 and (c or cm)}{m2 or '-':>5} {unit}{co}"
                     )
                 if m1 := cm and mqtt.get("pv_to_battery_power", ""):
                     m2 = cm and mqtt.get("pv_to_grid_power", "")
                     CONSOLE.info(
                         f"{'PV -> Batt Pwr':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
-                        f"{'PV -> Grid Pwr':<{col3}}: {m2 and (c or cm)}{m2:>5} {unit}{co}"
+                        f"{'PV -> Grid Pwr':<{col3}}: {m2 and (c or cm)}{m2 or '-':>5} {unit}{co}"
                     )
                 if m1 := cm and mqtt.get("battery_power_signed", ""):
                     m2 = cm and mqtt.get("battery_to_home_power", "")
                     CONSOLE.info(
                         f"{'Battery Power':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
-                        f"{'Bat -> Home Pwr':<{col3}}: {m2 and (c or cm)}{m2:>5} {unit}{co}"
+                        f"{'Bat -> Home Pwr':<{col3}}: {m2 and (c or cm)}{m2 or '-':>5} {unit}{co}"
                     )
                 if m1 := cm and mqtt.get("grid_to_battery_power", ""):
                     m2 = cm and mqtt.get("battery_to_grid_power", "")
                     CONSOLE.info(
                         f"{'Grid -> Bat Pwr':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
-                        f"{'Bat -> Grid Pwr':<{col3}}: {m2 and (c or cm)}{m2:>5} {unit}{co}"
+                        f"{'Bat -> Grid Pwr':<{col3}}: {m2 and (c or cm)}{m2 or '-':>5} {unit}{co}"
+                    )
+                if m1 := cm and mqtt.get("generator_power", ""):
+                    m2 = cm and mqtt.get("", "")
+                    CONSOLE.info(
+                        f"{'Generator Power':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
+                        # f"{'':<{col3}}: {m2 and (c or cm)}{m2:>5} {unit}{co}"
+                    )
+                if m1 := cm and mqtt.get("generator_to_home_power", ""):
+                    m2 = cm and mqtt.get("generator_to_battery_power", "")
+                    CONSOLE.info(
+                        f"{'Gen -> Home Pwr':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
+                        f"{'Gen -> Bat Pwr':<{col3}}: {m2 and (c or cm)}{m2 or '-':>5} {unit}{co}"
                     )
                 if m1 := cm and mqtt.get("grid_power_signed", ""):
                     m2 = cm and mqtt.get("home_demand", "")
                     CONSOLE.info(
-                        f"{'Grid power':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
-                        f"{'Home Demand':<{col3}}: {m2 and (c or cm)}{m2:>5} {unit}{co}"
+                        f"{'Grid Power':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
+                        f"{'Home Demand':<{col3}}: {m2 and (c or cm)}{m2 or '-':>5} {unit}{co}"
                     )
                 if "battery_capacity" in dev:
                     CONSOLE.info(
                         f"{'Capacity':<{col1}}: {cc}{customized.get('battery_capacity') or dev.get('battery_capacity', '-----')!s:>5} {'Wh':<{col2 - 6}}{co} "
                         f"{'Battery Count':<{col3}}: {dev.get('batCount') or '-'}"
+                    )
+                m1 = c and mqtt.get("battery_soc", "")
+                if m1 or avg:
+                    CONSOLE.info(
+                        f"{'Battery SoC':<{col1}}: {m1 and c}{m1 or avg.get('state_of_charge') or '---':>5} {'%':<{col2 - 6}}{co} "
+                        f"{'Battery Energy':<{col3}}: {cc}{dev.get('battery_energy', '-----'):>5} Wh{co}"
                     )
                 if m1 := cm and mqtt.get("battery_voltage", ""):
                     m1 = f"{float(m1):6.2f}"
@@ -1365,16 +1394,11 @@ class AnkerSolixApiMonitor:
                         f"{'Charged Energy':<{col1}}: {m1 and (c or cm)}{m1 or '----.---':>8} {'kWh':<{col2 - 9}}{co} "
                         f"{'Dischrgd Energy':<{col3}}: {m2 and (c or cm)}{m2 or '----.---':>8} {'kWh'}  {m3 and cc}({m3 or '--.--'} %){co}"
                     )
-                if avg := dev.get("average_power") or {}:
+                if avg:
                     unit = str(avg.get("power_unit") or "").upper()
                     CONSOLE.info(
                         f"{'Valid ⌀ before':<{col1}}: {avg.get('valid_time', 'Unknown'):<{col2}} "
                         f"{'Last Check':<{col3}}: {avg.get('last_check', 'Unknown')!s}"
-                    )
-                    m1 = c and mqtt.get("battery_soc", "")
-                    CONSOLE.info(
-                        f"{'Battery SoC':<{col1}}: {m1 and c}{m1 or avg.get('state_of_charge') or '---':>5} {'%':<{col2 - 6}}{co} "
-                        f"{'Battery Energy':<{col3}}: {cc}{dev.get('battery_energy', '-----'):>5} Wh{co}"
                     )
                     CONSOLE.info(
                         f"{'Solar Power ⌀':<{col1}}: {avg.get('solar_power_avg') or '-.--':>5} {unit:<{col2 - 6}} "
@@ -2342,6 +2366,22 @@ class AnkerSolixApiMonitor:
                                     f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
                                     f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
                                 )
+                    if m1 := c and mqtt.get("grid_discharged_today", ""):
+                        m1 = f"{float(m1):.2f}"
+                    if value := today.get("battery_to_grid") or m1:
+                        CONSOLE.info(
+                            f"{'Discharged Grid':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'Discharged Grid':<{col3}}: {yesterday.get('battery_to_grid') or '-.--':>6} {unit}"
+                        )
+                        for key, item in dev_energies.items():
+                            if t := (item.get("today") or {}).get("grid_to_battery"):
+                                y = (item.get("last_period") or {}).get(
+                                    "grid_to_battery"
+                                )
+                                CONSOLE.info(
+                                    f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
+                                    f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
+                                )
                     if value := today.get("3rd_party_pv_to_bat"):
                         CONSOLE.info(
                             f"{'Charged Ext PV':<{col1}}: {value or '-.--':>6} {unit:<{col2 - 7}} "
@@ -2432,7 +2472,7 @@ class AnkerSolixApiMonitor:
                                     f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
                                     f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
                                 )
-                    if m1 := c and mqtt.get("", ""):
+                    if m1 := c and mqtt.get("grid_import_today", ""):
                         m1 = f"{float(m1):.2f}"
                     if value := today.get("grid_import") or m1:
                         CONSOLE.info(
@@ -2446,12 +2486,26 @@ class AnkerSolixApiMonitor:
                                     f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
                                     f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
                                 )
+                    if m1 := c and mqtt.get("grid_export_today", ""):
+                        m1 = f"{float(m1):.2f}"
+                    if value := today.get("grid_export") or m1:
+                        CONSOLE.info(
+                            f"{'Grid Export':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'Grid Export':<{col3}}: {yesterday.get('grid_export') or '-.--':>6} {unit}"
+                        )
+                        for key, item in dev_energies.items():
+                            if t := (item.get("today") or {}).get("grid_export"):
+                                y = (item.get("last_period") or {}).get("grid_export")
+                                CONSOLE.info(
+                                    f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
+                                    f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
+                                )
                     if m1 := c and mqtt.get("pv_export_today", ""):
                         m1 = f"{float(m1):.2f}"
                     if value := today.get("solar_to_grid") or m1:
                         CONSOLE.info(
-                            f"{'Grid Export':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
-                            f"{'Grid Export':<{col3}}: {yesterday.get('solar_to_grid') or '-.--':>6} {unit}"
+                            f"{'Solar Export':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'Solar Export':<{col3}}: {yesterday.get('solar_to_grid') or '-.--':>6} {unit}"
                         )
                         for key, item in dev_energies.items():
                             if t := (item.get("today") or {}).get("solar_to_grid"):
@@ -2476,6 +2530,27 @@ class AnkerSolixApiMonitor:
                                     f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
                                     f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
                                 )
+                    if m1 := c and mqtt.get("generator_energy_today", ""):
+                        m1 = f"{float(m1):.2f}"
+                    if value := today.get("generator_energy") or m1:
+                        CONSOLE.info(
+                            f"{'Generator Prod':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'Generator Prod':<{col3}}: {yesterday.get('generator_energy') or '-.--':>6} {unit}"
+                        )
+                    if m1 := c and mqtt.get("generator_charged_today", ""):
+                        m1 = f"{float(m1):.2f}"
+                    if value := today.get("generator_to_battery") or m1:
+                        CONSOLE.info(
+                            f"{'Generator Batt':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'Generator Batt':<{col3}}: {yesterday.get('generator_to_battery') or '-.--':>6} {unit}"
+                        )
+                    if m1 := c and mqtt.get("generator_consumed_today", ""):
+                        m1 = f"{float(m1):.2f}"
+                    if value := today.get("generator_to_home") or m1:
+                        CONSOLE.info(
+                            f"{'Generator Home':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'Generator Home':<{col3}}: {yesterday.get('generator_to_home') or '-.--':>6} {unit}"
+                        )
                     if value := today.get("ac_socket"):
                         CONSOLE.info(
                             f"{'AC Socket':<{col1}}: {value or '-.--':>6} {unit:<{col2 - 7}} "
@@ -2819,7 +2894,10 @@ class AnkerSolixApiMonitor:
                                     )
                                 )
                                 for d in self.api.devices.values()
-                                if (not self.site_selected or d.get('site_id') == self.site_selected)
+                                if (
+                                    not self.site_selected
+                                    or d.get("site_id") == self.site_selected
+                                )
                             ]
                         # Ask if output should be filtered to certain device
                         if (

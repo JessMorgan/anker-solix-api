@@ -809,6 +809,8 @@ _A1780_0408 = {
 }
 
 _A1782_0421 = {
+    # F3000 param info
+    TOPIC: "param_info",
     "a2": {
         BYTES: {
             "01": {
@@ -1013,6 +1015,238 @@ _A1782_0421 = {
         }
     },
     "fd": {NAME: "unknown_fd_timestamp"},
+    "fe": {NAME: "msg_timestamp"},
+}
+
+_A1782_0502 = {
+    # F3000 state info with aggregated energies
+    TOPIC: "state_info",
+    # "a2": {
+    #     BYTES: {
+    #         "00": {
+    #             NAME: "energy_a2_00",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "02": {
+    #             NAME: "energy_a2_02",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "04": {
+    #             NAME: "energy_a2_04",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "06": {
+    #             NAME: "energy_a2_06",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "08": {
+    #             NAME: "energy_a2_08",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "10": {
+    #             NAME: "energy_a2_10",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "12": {
+    #             NAME: "energy_a2_12",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "14": {
+    #             NAME: "energy_a2_14",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "16": {
+    #             NAME: "energy_a2_16",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "18": {
+    #             NAME: "energy_a2_18",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #     }
+    # },
+    # "a3": {
+    #     BYTES: {
+    #         "00": {
+    #             NAME: "energy_a3_00",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "02": {
+    #             NAME: "energy_a3_02",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "04": {
+    #             NAME: "energy_a3_04",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "06": {
+    #             NAME: "energy_a3_06",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "08": {
+    #             NAME: "energy_a3_08",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "10": {
+    #             NAME: "energy_a3_10",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #     }
+    # },
+    # "a4": {
+    #     BYTES: {
+    #         "00": {
+    #             NAME: "energy_a4_00",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "02": {
+    #             NAME: "energy_a4_02",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "04": {
+    #             NAME: "energy_a4_04",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "06": {
+    #             NAME: "energy_a4_06",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "08": {
+    #             NAME: "energy_a4_08",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "10": {
+    #             NAME: "energy_a4_10",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "12": {
+    #             NAME: "energy_a4_12",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #     }
+    # },
+    # "a5": {
+    #     BYTES: {
+    #         "00": {
+    #             NAME: "energy_a5_00",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "02": {
+    #             NAME: "energy_a5_02",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "04": {
+    #             NAME: "energy_a5_04",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "06": {
+    #             NAME: "energy_a5_06",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "08": {
+    #             NAME: "energy_a5_08",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "10": {
+    #             NAME: "energy_a5_10",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "12": {
+    #             NAME: "energy_a5_12",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "14": {
+    #             NAME: "energy_a5_14",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "16": {
+    #             NAME: "energy_a5_16",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #     }
+    # },
+    # "a6": {
+    #     BYTES: {
+    #         "00": {
+    #             NAME: "energy_a6_00",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "02": {
+    #             NAME: "energy_a6_02",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "04": {
+    #             NAME: "energy_a6_04",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "06": {
+    #             NAME: "energy_a6_06",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "08": {
+    #             NAME: "energy_a6_08",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "10": {
+    #             NAME: "energy_a6_10",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "12": {
+    #             NAME: "energy_a6_12",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "14": {
+    #             NAME: "energy_a6_14",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #         "16": {
+    #             NAME: "energy_a6_16",
+    #             TYPE: DeviceHexDataTypes.sile.value,
+    #             SIGNED: False,
+    #         },
+    #     }
+    # },
+    "fd": {NAME: "local_timestamp"},
     "fe": {NAME: "msg_timestamp"},
 }
 
@@ -3268,6 +3502,8 @@ SOLIXMQTTMAP: Final[dict] = {
         "0057": CMD_REALTIME_TRIGGER,  # for regular status messages
         # Interval: ~3-5 seconds, but only with realtime trigger
         "0421": _A1782_0421,
+        "0502": _A1782_0502,
+        # Upon request, followed by 0100 status request command
         "0900": _A1782_0421,  # Same content as 0421
     },
     # Solarbank 1 E1600

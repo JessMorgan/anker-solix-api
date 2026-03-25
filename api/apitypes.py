@@ -224,7 +224,7 @@ API_HES_SVC_ENDPOINTS: Final[dict] = {
     "get_electric_plan_list": "charging_hes_svc/get_electric_utility_and_electric_plan_list",  # Energy plan if available for country & state combination, works with shared account
     "get_system_running_info": "charging_hes_svc/get_system_running_info",  # system runtime info, works with shared account
     "get_system_profit": "charging_hes_svc/get_system_profit_detail",  # works as member, {"siteId": siteId,"dateType": "year","start": "2025","end": ""} [day 2025-01-01, week, month 2025-01, year 2025], weekly syntax unklear
-    "energy_statistics": "charging_hes_svc/get_energy_statistics",  # Energy stats for HES, # source type [solar hes grid home]
+    "energy_statistics": "charging_hes_svc/get_energy_statistics",  # Energy stats for HES, # source type [solar hes grid home pps evCharger otherLoad]
     "get_monetary_units": "charging_hes_svc/get_world_monetary_unit",  # monetary unit list for system, works with shared account
     "get_install_info": "charging_hes_svc/get_install_info",  # get system install info, works with shared account. Shows installation location
     "get_wifi_info": "charging_hes_svc/get_wifi_info",  # get device wifi info, works with shared account
@@ -1439,6 +1439,22 @@ class SolixNetworkStatus(StrEnum):
     mobile = "3"  # HES systems support also 5G connections, code to be confirmed
     unknown = "unknown"
 
+
+class SolixWorkingStatus(StrEnum):
+    """Str Enumeration for Anker Solix HES working status."""
+    # TODO(X1): The proper description of those codes has to be confirmed
+    standby = "0"
+    running = "1"
+    unknown = "unknown"
+
+
+class SolixMode(StrEnum):
+    """Str Enumeration for Anker Solix HES mode."""
+    # TODO(X1): The proper description of those codes has to be confirmed
+    off = "0"
+    on = "1"
+    auto = "2"
+    unknown = "unknown"
 
 class SolixSwitchMode(IntEnum):
     """Int Enumeration for generic Anker Solix switch modes."""
