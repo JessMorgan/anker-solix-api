@@ -1506,6 +1506,14 @@ class SolixPpsChargingStatus(StrEnum):
     unknown = "unknown"
 
 
+class SolixPpsDcChargingStatus(StrEnum):
+    """Str Enumeration for Anker Solix PPS DC charging status."""
+
+    inactive = "0"
+    charging = "1"
+    unknown = "unknown"
+
+
 class SolixPpsPortStatus(StrEnum):
     """Str Enumeration for Anker Solix PPS port status."""
 
