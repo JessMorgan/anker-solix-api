@@ -994,6 +994,8 @@ class AnkerSolixApiExport:
                             "power_limit_option",
                             "power_limit_option_real",
                             "switch_0w",
+                            "ip_region",
+                            "regulation_code",
                         ],
                     },
                     replace=[(siteId, "<siteId>"), (sn, "<deviceSn>")],

@@ -239,8 +239,10 @@ API_HES_SVC_ENDPOINTS: Final[dict] = {
 }
 
 """ Other endpoints neither implemented nor explored: 97 + 79 used => 176
+    'power_service/v1/get_message_sn_list',  # get list of devices providing messages
     'power_service/v1/get_message_not_disturb',  # get do not disturb messages settings
-    'power_service/v1/message_not_disturb',  # change do not disturb messages settings
+    'power_service/v1/message_not_disturb',  # change do not disturb messages settings {"start_time": int(timedelta(hours=5).total_seconds()/60), "end_time": int(timedelta(hours=19,minutes=45).total_seconds()/60),
+        "disturb_switch": True, "disturb_scenes": {"boost_charging": True, "paused_car_charging": True,"paused_charging": True,"restore_charging": True,"smart_charging": True,"start_charging": True,"stop_charging": True}
     'power_service/v1/read_message', # payload format unknown
     'power_service/v1/add_message',
     'power_service/v1/del_message',
@@ -784,6 +786,7 @@ class SolixParmType(Enum):
     SOLARBANK_AUTHORIZATIONS = "13"
     SOLARBANK_POWERDOCK = "16"  # get power dock SN
     SOLARBANK_STATION = "18"  # station settings for site, like SOC reserve and grid export switch, works for systems that support power dock
+    SOLARBANK_POWER_LIMIT = "19"  # cannot be queried, but only set. get_power_limit query will show active data
     # SOLARBANK_EV_CHARGER = "23" # EV Charger switch?
     SOLARBANK_3RD_PARTY_PV = "26"  # third party PV settings for site
 

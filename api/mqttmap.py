@@ -2168,13 +2168,19 @@ _AX170_0405 = {
     TOPIC: "param_info",
     "a2": {NAME: "device_sn"},
     "a6": {NAME: "battery_soc_total"},  # Average SOC of all devices in system
-    "ab": {NAME: "pv_1_power"},
-    "ac": {NAME: "battery_power"},
-    "ad": {NAME: "solar_to_home_power?"},
-    "ae": {NAME: "solar_to_home_power_inv?"},
-    "b5": {NAME: "backup_soc_limit?"},
-    "b7": {NAME: "max_soc_limit?"},
-    "b9": {NAME: "home_load_preset?"},
+    "ab": {
+        NAME: "pv_power_total"
+    },  # Total PV power from all devices in system? Only verified with 1 E10 Module
+    "ac": {
+        NAME: "battery_power"
+    },  # Power draw from battery. Negative is charging, positive is discharging.
+    "b5": {
+        NAME: "backup_soc_limit"
+    },  # Preset setting for Self Consumption reserve power. Battery will stay charged to this level unless discharged from grid fault. PV will charge battery.
+    "b7": {NAME: "max_soc_limit?"},  # Maybe battery health??
+    "b9": {
+        NAME: "main_breaker_limit?"
+    },  # It's 200 on tests, so its a good chance its the 200AMP?
     "bf": {NAME: "timestamp_0405_bf?"},
     "c0": {NAME: "timestamp_0405_c0?"},
     "c3": {
@@ -2182,11 +2188,24 @@ _AX170_0405 = {
     },  # use_time_band: 1=peak, 2=mid-peak, 3=off-peak, 4=super-off-peak
     "c4": {NAME: "grid_power_signed"},  # positive=import, negative=export
     "c5": {NAME: "home_load?"},
-    "c6": {NAME: "pv_1_power?"},
-    "c7": {NAME: "pv_2_power?"},
-    "cd": {NAME: "home_demand?"},
+    "cc": {
+        BYTES: {
+            "00": {
+                NAME: "power_dock_state_code?",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },  # Not very reliable, not sure what the setting is exactly.
+            "01": {
+                NAME: "power_dock_state_code_2?",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },  # 64 == discharging, 48 == charging, 32 charged -- more reliable..
+        }
+    },
+    "cd": {NAME: "home_demand_total?"},
+    "ce": {NAME: "dc_generator_plugged_in"},
+    "d4": {NAME: "pv_power_3rd_party"},  # Power from external solar to home?
+    "d6": {NAME: "dc_generator_input_power"},
     "dd": {NAME: "display_timeout_seconds"},
-    "de": {NAME: "max_load_limit_total?"},
+    "de": {NAME: "max_load_limit_total?"}, # shows 4800 in monitoring. Not sure what this is.
     "e4": {
         BYTES: {
             "00": {
@@ -2249,6 +2268,22 @@ _AX170_0405 = {
                 NAME: "device_1_sn",
                 TYPE: DeviceHexDataTypes.str.value,
             },
+            "41": {
+                NAME: "device_1_soc",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },
+            "42": {
+                NAME: "device_1_pv_1_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "45": {
+                NAME: "device_1_pv_2_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "57": {
+                NAME: "device_1_battery_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
         }
     },
     "e9": {
@@ -2260,6 +2295,22 @@ _AX170_0405 = {
             "11": {
                 NAME: "device_2_sn",
                 TYPE: DeviceHexDataTypes.str.value,
+            },
+            "41": {
+                NAME: "device_2_soc",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },
+            "42": {
+                NAME: "device_2_pv_1_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "45": {
+                NAME: "device_2_pv_2_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "57": {
+                NAME: "device_2_battery_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
             },
         }
     },
@@ -2273,6 +2324,22 @@ _AX170_0405 = {
                 NAME: "device_3_sn",
                 TYPE: DeviceHexDataTypes.str.value,
             },
+            "41": {
+                NAME: "device_3_soc",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },
+            "42": {
+                NAME: "device_3_pv_1_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "45": {
+                NAME: "device_3_pv_2_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "57": {
+                NAME: "device_3_battery_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
         }
     },
     "eb": {
@@ -2285,6 +2352,22 @@ _AX170_0405 = {
                 NAME: "device_4_sn",
                 TYPE: DeviceHexDataTypes.str.value,
             },
+            "41": {
+                NAME: "device_4_soc",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },
+            "42": {
+                NAME: "device_4_pv_1_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "45": {
+                NAME: "device_4_pv_2_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "57": {
+                NAME: "device_4_battery_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
         }
     },
     "ec": {
@@ -2296,6 +2379,22 @@ _AX170_0405 = {
             "11": {
                 NAME: "device_5_sn",
                 TYPE: DeviceHexDataTypes.str.value,
+            },
+            "41": {
+                NAME: "device_5_soc",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },
+            "42": {
+                NAME: "device_5_pv_1_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "45": {
+                NAME: "device_5_pv_2_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
+            },
+            "57": {
+                NAME: "device_5_battery_power",
+                TYPE: DeviceHexDataTypes.sfle.value,
             },
         }
     },
@@ -3911,9 +4010,9 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {NAME: "device_sn"},
             "a6": {NAME: "sw_version", "values": 4},
             "a7": {NAME: "sw_controller", "values": 4},
-            "b1": {NAME: "grid_power_signed_l1"}, # negative = Export
-            "b2": {NAME: "grid_power_signed_l2"}, # negative = Export
-            "b3": {NAME: "grid_power_signed"}, # negative = Export
+            "b1": {NAME: "grid_power_signed_l1"},  # negative = Export
+            "b2": {NAME: "grid_power_signed_l2"},  # negative = Export
+            "b3": {NAME: "grid_power_signed"},  # negative = Export
             "b4": {NAME: "current_l1"},
             "b5": {NAME: "voltage_l1"},
             "b6": {NAME: "current_l2"},
