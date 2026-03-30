@@ -567,11 +567,14 @@ Pull requests are the best way to propose changes to the codebase.
 1. Test your contribution.
 1. Issue that pull request!
 
+
 # Acknowledgements / Credits
 
 - [python-eufy-security](https://github.com/FuzzyMistborn/python-eufy-security)
 - [solix2mqtt](https://github.com/tomquist/solix2mqtt)
-- [SolixBLE](https://github.com/flip-dots/SolixBLE)
+- [Anker Solix BLE library - Local Bluetooth interface only (Inofficial)](https://github.com/flip-dots/SolixBLE)
+- [Anker Solix Api exploration](https://github.com/moag1000/anker-solix-api-exploration)
+
 
 # Showing Your Appreciation
 

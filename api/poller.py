@@ -1246,9 +1246,10 @@ async def poll_device_details(  # noqa: C901
                     )
                     await api.get_device_attributes(
                         deviceSn=sn,
-                        attributes=[
-                            "pv_power_limit"
-                        ],  # , "switch_0w" does not reflect station setting
+                        # "enable_0w" does not reflect switch capability, so its misleading
+                        # "switch_0w" only reliable if not station managed
+                        attributes=["pv_power_limit"]
+                        + (["switch_0w"] if device.get("station_sn") is None else []),
                         fromFile=fromFile,
                     )
 
