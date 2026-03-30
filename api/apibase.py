@@ -687,11 +687,10 @@ class AnkerSolixBaseApi:
                                 "system_output_current_l2",
                                 "system_output_current_l3",
                             ]
-                            and str(value)
-                            .replace("-", "", 1)
-                            .replace(".", "", 1)
-                            .isdigit()
-                        ):
+                            or key.startswith("home_demand_circuit_")  # Monitor and HA missing
+                        ) and str(value).replace("-", "", 1).replace(
+                            ".", "", 1
+                        ).isdigit():
                             device_mqtt[key] = f"{float(value):.3f}"
                         elif (
                             key
@@ -836,7 +835,8 @@ class AnkerSolixBaseApi:
                                 "plug_status",  # HA missing
                                 "solar_evcharge_monitoring_mode",  # HA not used
                                 "working_status",
-                                "mode",  # HA missing, meaning not clear
+                                "mode",  # HA missing, HES meaning not clear
+                                "dc_generator_plugged_in",  # HA missing, generator monitoring not fully described
                             ]
                             and value is not None
                         ):

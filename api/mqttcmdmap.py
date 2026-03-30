@@ -32,7 +32,7 @@ COMMAND_NAME: Final[str] = (
 COMMAND_LIST: Final[str] = (
     "command_list"  # specifies the nested commands to describe multiple commands per message type
 )
-COMMAND_ENCODING: Final[str] = "command_encoding" # encoding_type for command message
+COMMAND_ENCODING: Final[str] = "command_encoding"  # encoding_type for command message
 STATE_NAME: Final[str] = (
     "state_name"  # extracted value name that represents the current state of the control
 )
@@ -134,6 +134,7 @@ class SolixMqttCommands:
         "ev_load_balancing"  # complex command with switches and schedule
     )
     ev_solar_charging: str = "ev_solar_charging"  # complex command with switches
+    ac_dc_mode_select: str = "ac_dc_mode_select"
 
     def asdict(self) -> dict:
         """Return a dictionary representation of the class fields."""
@@ -880,40 +881,51 @@ CMD_SB_USAGE_MODE = (
     }
 )
 
-CMD_PLUG_SCHEDULE = CMD_COMMON | {
-    # Command: Smartplug schedule
-    COMMAND_NAME: SolixMqttCommands.plug_schedule,
-    "a2": {
-        NAME: "set_plug_schedule_action",  # 0=delete, 1=create, 2=modify
-        TYPE: DeviceHexDataTypes.ui.value,
-        VALUE_OPTIONS: {"delete": 0, "create": 1, "modify": 2}
-    },
-    "a3": {
-        NAME: "set_plug_schedule_slot",  # schedule slot index, 1-x
-        TYPE: DeviceHexDataTypes.ui.value,
-        VALUE_MIN: 1,
-        VALUE_MAX: 10,
-    },
-    "a4": {
-        NAME: "set_plug_schedule_enabled",  # 0=disabled, 1=enabled
-        TYPE: DeviceHexDataTypes.ui.value,
-        VALUE_DEFAULT: 1,
-    },
-    "a5": TIME_SILE
+CMD_PLUG_SCHEDULE = (
+    CMD_COMMON
     | {
-        NAME: "set_plug_schedule_time",  # min;hour as byte pair
-    },
-    "a6": {
-        NAME: "set_plug_schedule_switch",  # Off (0), On (1)
-        TYPE: DeviceHexDataTypes.ui.value,
-        VALUE_OPTIONS: {"off": 0, "on": 1},
-    },
-    "a7": {
-        NAME: "set_plug_schedule_weekdays",  # weekday selection as day numbers (1=Mon..7=Sun), length 1-7 (one byte per day)
-        TYPE: DeviceHexDataTypes.bin.value,
-        VALUE_OPTIONS: {"monday": 1, "tuesday": 2, "wednesday": 3, "thursday": 4, "friday": 5, "saturday": 6, "sunday": 7},
-    },
-}
+        # Command: Smartplug schedule
+        COMMAND_NAME: SolixMqttCommands.plug_schedule,
+        "a2": {
+            NAME: "set_plug_schedule_action",  # 0=delete, 1=create, 2=modify
+            TYPE: DeviceHexDataTypes.ui.value,
+            VALUE_OPTIONS: {"delete": 0, "create": 1, "modify": 2},
+        },
+        "a3": {
+            NAME: "set_plug_schedule_slot",  # schedule slot index, 1-x
+            TYPE: DeviceHexDataTypes.ui.value,
+            VALUE_MIN: 1,
+            VALUE_MAX: 10,
+        },
+        "a4": {
+            NAME: "set_plug_schedule_enabled",  # 0=disabled, 1=enabled
+            TYPE: DeviceHexDataTypes.ui.value,
+            VALUE_DEFAULT: 1,
+        },
+        "a5": TIME_SILE
+        | {
+            NAME: "set_plug_schedule_time",  # min;hour as byte pair
+        },
+        "a6": {
+            NAME: "set_plug_schedule_switch",  # Off (0), On (1)
+            TYPE: DeviceHexDataTypes.ui.value,
+            VALUE_OPTIONS: {"off": 0, "on": 1},
+        },
+        "a7": {
+            NAME: "set_plug_schedule_weekdays",  # weekday selection as day numbers (1=Mon..7=Sun), length 1-7 (one byte per day)
+            TYPE: DeviceHexDataTypes.bin.value,
+            VALUE_OPTIONS: {
+                "monday": 1,
+                "tuesday": 2,
+                "wednesday": 3,
+                "thursday": 4,
+                "friday": 5,
+                "saturday": 6,
+                "sunday": 7,
+            },
+        },
+    }
+)
 
 CMD_PLUG_DELAYED_TOGGLE = CMD_COMMON | {
     # Command: Smartplug delayed toggle
@@ -929,7 +941,7 @@ CMD_PLUG_DELAYED_TOGGLE = CMD_COMMON | {
         BYTES: {
             "00": TIME_VAR
             | {
-                NAME: "set_toggle_to_delay_time", # 3 bytes: Seconds:Minutes:Hours
+                NAME: "set_toggle_to_delay_time",  # 3 bytes: Seconds:Minutes:Hours
                 VALUE_DEFAULT: 0,
             },
         },
@@ -945,7 +957,7 @@ CMD_PLUG_DELAYED_TOGGLE = CMD_COMMON | {
         BYTES: {
             "00": TIME_VAR
             | {
-                NAME: "set_toggle_back_delay_time", # 3 bytes: Seconds:Minutes:Hours
+                NAME: "set_toggle_back_delay_time",  # 3 bytes: Seconds:Minutes:Hours
                 VALUE_DEFAULT: 0,
             },
         },
@@ -955,7 +967,7 @@ CMD_PLUG_DELAYED_TOGGLE = CMD_COMMON | {
 CMD_EV_CHARGER_MODE = CMD_COMMON | {
     # Command: EV Charger mode selection
     COMMAND_NAME: SolixMqttCommands.ev_charger_mode_select,
-    COMMAND_ENCODING: 2, # encoding_type 2 seems to be required for this command message
+    COMMAND_ENCODING: 2,  # encoding_type 2 seems to be required for this command message
     # Charger Status: Standby(0), Preparing(1), Charging(2), Charger_Paused(3), Vehicle_Paused(4), Completed (5), Reserving(6), Disabled(7), Error(8)
     "a2": {
         NAME: "set_ev_charger_mode",  # Start(1), Stop(2), Skip Delay (3), Boost(4)
@@ -972,7 +984,7 @@ CMD_EV_CHARGER_MODE = CMD_COMMON | {
 CMD_DEVICE_POWER_MODE = CMD_COMMON | {
     # Command: EV Charger device power mode
     COMMAND_NAME: SolixMqttCommands.device_power_mode,
-    COMMAND_ENCODING: 2, # encoding_type 2 may be required for this command message
+    COMMAND_ENCODING: 2,  # encoding_type 2 may be required for this command message
     "a2": {
         NAME: "set_device_power_mode",  # Restart(5)
         TYPE: DeviceHexDataTypes.ui.value,
@@ -1296,3 +1308,14 @@ CMD_EV_CHARGER_SCHEDULE_TIMES = (
         },
     }
 )
+
+CMD_AC_DC_MODE = CMD_COMMON | {
+    # Command: EV charger light brightness setting
+    COMMAND_NAME: SolixMqttCommands.ac_dc_mode_select,
+    "a5": {
+        NAME: "set_ac_dc_mode",
+        TYPE: DeviceHexDataTypes.ui.value,
+        STATE_NAME: "ac_dc_mode",
+        VALUE_OPTIONS: {"dc": 1, "ac": 3},
+    },
+}

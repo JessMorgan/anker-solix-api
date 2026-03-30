@@ -1379,8 +1379,18 @@ class SmartmeterStatus(StrEnum):
 class PowerdockStatus(StrEnum):
     """Str Enumeration for Anker Solix Power Dock status."""
 
-    # TODO(#MS) Update status description once known
-    ok = "0"  # normal power dock state
+    # TODO(#AE100) Update status description once known
+    ok = "0"  # normal power dock state (AE100)
+    unknown = "unknown"
+
+
+class PowerdockChargingStatus(StrEnum):
+    """Str Enumeration for Anker Solix Power Dock charging status."""
+
+    # TODO(#AX170) Update status description once known, is this only a half byte usage?
+    idle = "32"  # 0010 0000
+    charging = "48"  # 0011 0000
+    discharging = "64"  # 0100 0000
     unknown = "unknown"
 
 
