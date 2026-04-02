@@ -340,15 +340,12 @@ API_HES_SVC_ENDPOINTS: Final[dict] = {
     'power_service/v1/app/set_oil_consumption_reminder_plan'
     'power_service/v1/app/set_maintain_parts_ignore_reminders'
 
-
 related to power V2: 5 + 0 used => 5 total
     'power_service/v2/app/get_custom_branch_icon' # get list of branch icons and url
     'power_service/v2/app/get_hardware_relation'# shows empty list, {"sn_list": [deviceSn]}
     'power_service/v2/platform_get_pn_region_code'# shows region codes per PN, but purpose unclear, {"product_code": "A5102"}
     'power_service/v2/site/platform_energy_analysis_options'
     'power_service/v2/app/set_device_pv_name'
-
-
 
 related to micro inverter without system: 1 + 6 used => 7 total
     'charging_pv_svc/getMiStatus',
