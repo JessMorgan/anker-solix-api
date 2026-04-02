@@ -36,6 +36,7 @@ FEATURES = {
     SolixMqttCommands.usbc_3_port_switch: MODELS,
     SolixMqttCommands.usbc_4_port_switch: MODELS,
     SolixMqttCommands.usba_port_switch: MODELS,
+    SolixMqttCommands.ac_2_port_switch: MODELS,
     SolixMqttCommands.plug_lock_switch: MODELS,
     SolixMqttCommands.ev_auto_start_switch: MODELS,
     SolixMqttCommands.ev_auto_charge_restart_switch: MODELS,

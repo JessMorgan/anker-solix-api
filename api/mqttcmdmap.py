@@ -26,6 +26,9 @@ LENGTH: Final[str] = (
 MASK: Final[str] = (
     "mask"  # Define a bit mask value to be used for decoding the data value. Required if a single byte may reflect multiple data fields/settings
 )
+OFFSET: Final[str] = (
+    "offset"  # Key word to indicate byte offset to use from beginning of field
+)
 COMMAND_NAME: Final[str] = (
     "command_name"  # name of the command, must be defined in dataclass SolixMqttCommands
 )
@@ -93,6 +96,8 @@ class SolixMqttCommands:
     usbc_3_port_switch: str = "usbc_3_port_switch"
     usbc_4_port_switch: str = "usbc_4_port_switch"
     usba_port_switch: str = "usba_port_switch"
+    ac_1_port_switch: str = "ac_1_port_switch"
+    ac_2_port_switch: str = "ac_2_port_switch"
     soc_limits: str = "soc_limits"
     sb_status_check: str = "sb_status_check"
     sb_power_cutoff_select: str = "sb_power_cutoff_select"
@@ -471,6 +476,23 @@ CMD_USB_PORT_SWITCH = CMD_COMMON | {
     },
 }
 
+CMD_AC_PORT_SWITCH = CMD_COMMON | {
+    # Command: Charger AC port switch setting
+    # COMMAND_NAME: Must be added depdning on which port is to be switched,
+    "a2": {
+        NAME: "set_ac_port_switch_select",
+        TYPE: DeviceHexDataTypes.ui.value,
+        VALUE_OPTIONS: {
+            "ac_1_switch": 0,
+            "ac_2_switch": 1,
+        },
+    },
+    "a3": {
+        NAME: "set_ac_port_switch",
+        TYPE: DeviceHexDataTypes.ui.value,
+        VALUE_OPTIONS: {"off": 0, "on": 1},
+    },
+}
 
 CMD_SOC_LIMITS_V2 = CMD_COMMON_V2 | {
     # Command: PPS soc limit settings
