@@ -990,9 +990,9 @@ class AnkerSolixApiMonitor:
                     m1 = c and mqtt.get("max_load", "")
                     m3 = c and mqtt.get("max_load_total", "")
                     m2 = c and mqtt.get("ac_input_limit", "")
-                    all = m3 or dev.get("all_power_limit","")
+                    all = m3 or dev.get("all_power_limit", "")
                     CONSOLE.info(
-                        f"{'Power Limit':<{col1}}: {m1 and c}{m1 or dev.get('power_limit') or '----':>4} {m3 and c}{('(All '+all+' '+unit+')') if all else '':<{col2 - 5}}{co} "
+                        f"{'Power Limit':<{col1}}: {m1 and c}{m1 or dev.get('power_limit') or '----':>4} {m3 and c}{('(All ' + all + ' ' + unit + ')') if all else '':<{col2 - 5}}{co} "
                         f"{'AC Input Limit':<{col3}}: {m2 and c}{m2 or dev.get('ac_input_limit') or '----':>4} W{co}"
                     )
                     if isinstance(opt := dev.get("power_limit_option"), list):
@@ -1004,7 +1004,7 @@ class AnkerSolixApiMonitor:
                             if key == "limit"
                         ]
                     CONSOLE.info(
-                        f"{'Pwr Limit Opt':<{col1}}: {str(opt or '------').replace(" ",""):<{col2}}{co} "
+                        f"{'Pwr Limit Opt':<{col1}}: {str(opt or '------').replace(' ', ''):<{col2}}{co} "
                         f"{'Limit Opt Real':<{col3}}: {(dev.get('power_limit_option_real') or '------')!s}"
                     )
                 if "pv_power_limit" in dev:

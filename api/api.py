@@ -1832,7 +1832,9 @@ class AnkerSolixApi(AnkerSolixBaseApi):
                     {
                         "device_sn": sn,
                         # Use the device or total power limit key for proper control, depending on parallel type
-                        f"{'all_' if p_type == SolarbankParallelTypes.diy.value else ''}power_limit": device.get("power_limit")
+                        f"{'all_' if p_type == SolarbankParallelTypes.diy.value else ''}power_limit": device.get(
+                            "power_limit"
+                        )
                         or (data.get("legal_power_limit") if copy_limits else 0),
                         "power_limit_option": device.get("power_limit_option")
                         or (data.get("power_limit_option") if copy_limits else None),

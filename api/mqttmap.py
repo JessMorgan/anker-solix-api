@@ -4197,7 +4197,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
-                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
+                VALUE_OPTIONS_STATE: "max_load_parallel_options",  # key to be used to provide valid options
             },
             "a3": {
                 **CMD_SB_MAX_LOAD["a3"],
@@ -4226,7 +4226,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000],
-                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
+                    VALUE_OPTIONS_STATE: "max_load_options",  # key to be used to provide valid options
                 }
             },
             SolixMqttCommands.sb_disable_grid_export_switch: CMD_SB_DISABLE_GRID_EXPORT_SWITCH,  # Grid export (0), Disable grid export (1)
@@ -4250,7 +4250,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
-                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
+                VALUE_OPTIONS_STATE: "max_load_parallel_options",  # key to be used to provide valid options
             },
             "a3": {
                 **CMD_SB_MAX_LOAD["a3"],
@@ -4279,7 +4279,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000, 1200],
-                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
+                    VALUE_OPTIONS_STATE: "max_load_options",  # key to be used to provide valid options
                 }
             },
             SolixMqttCommands.sb_disable_grid_export_switch: CMD_SB_DISABLE_GRID_EXPORT_SWITCH,  # Grid export (0), Disable grid export (1)
@@ -4305,7 +4305,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
-                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
+                VALUE_OPTIONS_STATE: "max_load_parallel_options",  # key to be used to provide valid options
             },
             "a3": {
                 **CMD_SB_MAX_LOAD["a3"],
@@ -4333,7 +4333,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000],
-                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
+                    VALUE_OPTIONS_STATE: "max_load_options",  # key to be used to provide valid options
                 },
             },
             SolixMqttCommands.sb_disable_grid_export_switch: CMD_SB_DISABLE_GRID_EXPORT_SWITCH,  # Grid export (0), Disable grid export (1)
@@ -4390,7 +4390,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000, 1200],
-                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
+                    VALUE_OPTIONS_STATE: "max_load_options",  # key to be used to provide valid options
                 },
                 # Extra field a4 observed for SB3, which does not seem to be used for SB2?
                 "a4": {
@@ -4599,7 +4599,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
-                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
+                VALUE_OPTIONS_STATE: "max_load_parallel_options",  # key to be used to provide valid options
                 STATE_NAME: "max_load_total",
             },
             "a3": {
