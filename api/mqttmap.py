@@ -5,7 +5,7 @@ from typing import Final
 from .apitypes import DeviceHexDataTypes
 from .mqttcmdmap import (
     BYTES,
-    # CMD_AC_CHARGE_LIMIT,
+    CMD_AC_CHARGE_LIMIT,
     CMD_AC_DC_MODE,
     CMD_AC_FAST_CHARGE_SWITCH,
     CMD_AC_OUTPUT_MODE,
@@ -80,6 +80,7 @@ from .mqttcmdmap import (
     VALUE_MAX_STATE,
     VALUE_MIN,
     VALUE_OPTIONS,
+    VALUE_OPTIONS_STATE,
     VALUE_STEP,
     SolixMqttCommands,
 )
@@ -135,7 +136,7 @@ _A1722_0405 = {
     "aa": {NAME: "usba_1_power"},  # USB-A port 1 output power
     "ac": {NAME: "dc_input_power_total"},  # DC input power (solar/car charging)
     "ad": {NAME: "ac_input_power_total"},  # Total AC Input in W (int)
-    "ae": {NAME: "ac_output_power_total"},  # Total AOutput in W (int)
+    "ae": {NAME: "ac_output_power_total"},  # Total AC Output in W (int)
     "b7": {
         NAME: "ac_output_power_switch"
     },  # AC output switch: Disabled (0) or Enabled (1)
@@ -148,6 +149,7 @@ _A1722_0405 = {
         NAME: "dc_output_power_switch"
     },  # DC output switch: Disabled (0) or Enabled (1)
     "c5": {NAME: "device_sn"},  # Device serial number
+    "c6": {NAME: "ac_input_limit"},  # Recharge limit
     "cf": {
         NAME: "display_mode"
     },  # Display brightness: Off (0), Low (1), Medium (2), High (3)
@@ -2207,7 +2209,7 @@ _AX170_0405 = {
         NAME: "use_time_band?"
     },  # use_time_band: 1=peak, 2=mid-peak, 3=off-peak, 4=super-off-peak
     "c4": {NAME: "grid_power_signed"},  # positive=import, negative=export
-    "c5": {NAME: "home_load?"},
+    "c5": {NAME: "ac_output_power?"},
     "cc": {
         BYTES: {
             "00": {
@@ -2988,7 +2990,7 @@ _DOCK_0405 = {
     "a3": {NAME: "sw_version", "values": 4},
     "a5": {NAME: "ac_output_power_signed"},
     "a6": {
-        NAME: "ac_output_power_signed_total",
+        NAME: "device_output_power_signed_total",
         FACTOR: -1,
     },  # All SB outputs (negative is SB output)
     "a7": {NAME: "usage_mode"},  # SB2 usage mode
@@ -3002,13 +3004,13 @@ _DOCK_0405 = {
                 TYPE: DeviceHexDataTypes.str.value,
             },
             {
-                NAME: "device_1_type", # 01 = A17C1, 05 = A17C5 ?
+                NAME: "device_1_type",  # 01 = A17C1, 05 = A17C5 ?
                 TYPE: DeviceHexDataTypes.ui.value,
             },
             {
                 NAME: "device_1_soc",
                 TYPE: DeviceHexDataTypes.ui.value,
-                OFFSET: 0, # Example for Byte offset from previous field in case of description gap
+                OFFSET: 0,  # Example for Byte offset from previous field in case of description gap
             },
         ]
     },
@@ -3021,7 +3023,7 @@ _DOCK_0405 = {
                 TYPE: DeviceHexDataTypes.str.value,
             },
             {
-                NAME: "device_2_type", # 01 = A17C1, 05 = A17C5 ?
+                NAME: "device_2_type",  # 01 = A17C1, 05 = A17C5 ?
                 TYPE: DeviceHexDataTypes.ui.value,
             },
             {
@@ -3039,7 +3041,7 @@ _DOCK_0405 = {
                 TYPE: DeviceHexDataTypes.str.value,
             },
             {
-                NAME: "device_3_type", # 01 = A17C1, 05 = A17C5 ?
+                NAME: "device_3_type",  # 01 = A17C1, 05 = A17C5 ?
                 TYPE: DeviceHexDataTypes.ui.value,
             },
             {
@@ -3057,7 +3059,7 @@ _DOCK_0405 = {
                 TYPE: DeviceHexDataTypes.str.value,
             },
             {
-                NAME: "device_4_type", # 01 = A17C1, 05 = A17C5 ?
+                NAME: "device_4_type",  # 01 = A17C1, 05 = A17C5 ?
                 TYPE: DeviceHexDataTypes.ui.value,
             },
             {
@@ -3079,8 +3081,8 @@ _DOCK_0420 = {
     "a8": {NAME: "0420_unknown_1?"},
     "a9": {NAME: "usage_mode"},  # SB usage modes
     "ab": {NAME: "grid_power_signed"},
-    "ac": {NAME: "ac_output_power_signed_total"},  # Combined device output power
-    "ae": {NAME: "home_load"},  # Combined output power
+    "ac": {NAME: "device_output_power_signed_total"},  # Combined device output power
+    "ae": {NAME: "ac_output_power"},  # Dock output power to home
     "af": {NAME: "home_demand_total"},  # Total across all devices in system
     "b0": {NAME: "pv_power_total"},  # Total across all devices in system
     "b1": {NAME: "battery_power_signed_total"},
@@ -3262,16 +3264,18 @@ _DOCK_0420 = {
     },
     "c1": {NAME: "main_device_sn?"},
     "c2": {NAME: "pv_power_3rd_party"},
-    "c3": {NAME: "backup_start_timestamp?"},
-    "c4": {NAME: "backup_end_timestamp?"},
+    "c3": {NAME: "backup_start_timestamp"},
+    "c4": {NAME: "backup_end_timestamp"},
 }
 
 _DOCK_0421 = {
     # multisystem message
     TOPIC: "state_info",
-    "a4": {NAME: "max_load_total"}, # user applied max load limit across all devices
+    "a4": {NAME: "max_load_total"},  # user applied max load limit across all devices
     "a5": {NAME: "ac_input_limit_total"},
-    "a6": {NAME: "max_load_limit_total"}, # system defined limit based on given installation
+    "a6": {
+        NAME: "max_load_limit_total"
+    },  # system defined limit based on given installation
     "a7": {NAME: "battery_soc_total"},  # Average SOC of all solarbank devices in system
     "ac": {NAME: "max_soc?"},
     "ae": {NAME: "usage_mode"},  # SB usage modes
@@ -3290,7 +3294,7 @@ _DOCK_0428 = {
     "a6": {NAME: "usage_mode"},  # SB usage modes
     "a7": {NAME: "home_load_default"},  # default home load
     "ab": {NAME: "pv_power_total"},
-    "b1": {NAME: "ac_output_power_signed_total"},
+    "b1": {NAME: "device_output_power_signed_total"},
     "b5": {NAME: "battery_power_signed_total"},
     "bc": {NAME: "0428_unknown_bc?"},
     "bf": {
@@ -3686,6 +3690,14 @@ _PP_JSON = {
 SOLIXMQTTMAP: Final[dict] = {
     # PPS C300 AC
     "A1722": {
+        "0044": CMD_AC_CHARGE_LIMIT  # AC Recharge Limit: 100, 200, 300, 330 W
+        | {
+            "a2": {
+                **CMD_AC_CHARGE_LIMIT["a2"],
+                VALUE_OPTIONS: [100, 200, 300, 330],
+            }
+        },
+        "004a": CMD_AC_OUTPUT_SWITCH,  # AC output switch: Disabled (0) or Enabled (1)
         "004b": CMD_DC_OUTPUT_SWITCH,  # DC output switch: Disabled (0) or Enabled (1)
         "004f": CMD_LIGHT_MODE  # LED mode: Off (0), Low (1), Medium (2), High (3)
         | {
@@ -3703,6 +3715,14 @@ SOLIXMQTTMAP: Final[dict] = {
     },
     # PPS C300X AC
     "A1723": {
+        "0044": CMD_AC_CHARGE_LIMIT  # AC Recharge Limit: 100, 200, 300, 330 W
+        | {
+            "a2": {
+                **CMD_AC_CHARGE_LIMIT["a2"],
+                VALUE_OPTIONS: [100, 200, 300, 330],
+            }
+        },
+        "004a": CMD_AC_OUTPUT_SWITCH,  # AC output switch: Disabled (0) or Enabled (1)
         "004b": CMD_DC_OUTPUT_SWITCH,  # DC output switch: Disabled (0) or Enabled (1)
         "004f": CMD_LIGHT_MODE  # LED mode: Off (0), Low (1), Medium (2), High (3)
         | {
@@ -4177,6 +4197,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
+                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
             },
             "a3": {
                 **CMD_SB_MAX_LOAD["a3"],
@@ -4205,6 +4226,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000],
+                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
                 }
             },
             SolixMqttCommands.sb_disable_grid_export_switch: CMD_SB_DISABLE_GRID_EXPORT_SWITCH,  # Grid export (0), Disable grid export (1)
@@ -4228,6 +4250,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
+                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
             },
             "a3": {
                 **CMD_SB_MAX_LOAD["a3"],
@@ -4256,6 +4279,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000, 1200],
+                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
                 }
             },
             SolixMqttCommands.sb_disable_grid_export_switch: CMD_SB_DISABLE_GRID_EXPORT_SWITCH,  # Grid export (0), Disable grid export (1)
@@ -4281,6 +4305,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
+                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
             },
             "a3": {
                 **CMD_SB_MAX_LOAD["a3"],
@@ -4308,6 +4333,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000],
+                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
                 },
             },
             SolixMqttCommands.sb_disable_grid_export_switch: CMD_SB_DISABLE_GRID_EXPORT_SWITCH,  # Grid export (0), Disable grid export (1)
@@ -4332,6 +4358,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
+                VALUE_OPTIONS_STATE: "max_load_parallel_options",
             },
             "a3": {
                 **CMD_SB_MAX_LOAD["a3"],
@@ -4363,6 +4390,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 "a2": {
                     **CMD_SB_MAX_LOAD["a2"],
                     VALUE_OPTIONS: [350, 600, 800, 1000, 1200],
+                    VALUE_OPTIONS_STATE: "max_load_options", # key to be used to provide valid options
                 },
                 # Extra field a4 observed for SB3, which does not seem to be used for SB2?
                 "a4": {
@@ -4571,6 +4599,7 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 **CMD_SB_MAX_LOAD["a2"],
                 VALUE_OPTIONS: [1200, 2400, 3600, 4800],
+                VALUE_OPTIONS_STATE: "max_load_parallel_options", # key to be used to provide valid options
                 STATE_NAME: "max_load_total",
             },
             "a3": {

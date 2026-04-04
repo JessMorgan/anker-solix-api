@@ -821,7 +821,7 @@ class AnkerSolixApiMonitor:
                         f"{'Max Load Legal':<{col3}}: {site.get('site_details', {}).get('legal_power_limit') or '----':>4} {unit}{co}"
                     )
                 m1 = cm and mqtt.get("home_demand_total", "")
-                m2 = cm and mqtt.get("ac_output_power_signed_total", "")
+                m2 = cm and mqtt.get("device_output_power_signed_total", "")
                 if m1 or m2:
                     CONSOLE.info(
                         f"{'Home Demand Tot':<{col1}}:{m1 and (c or cm)}{m1 or '----':>5} {unit:<{col2 - 5}}{co} "
@@ -986,11 +986,13 @@ class AnkerSolixApiMonitor:
                     else:
                         break
                 # Solarbank power limits
-                if "power_limit" in dev:
+                if "power_limit" in dev or "all_power_limit" in dev:
                     m1 = c and mqtt.get("max_load", "")
+                    m3 = c and mqtt.get("max_load_total", "")
                     m2 = c and mqtt.get("ac_input_limit", "")
+                    all = m3 or dev.get("all_power_limit","")
                     CONSOLE.info(
-                        f"{'Power Limit':<{col1}}: {m1 and c}{m1 or dev.get('power_limit') or '----':>4} {unit:<{col2 - 5}}{co} "
+                        f"{'Power Limit':<{col1}}: {m1 and c}{m1 or dev.get('power_limit') or '----':>4} {m3 and c}{('(All '+all+' '+unit+')') if all else '':<{col2 - 5}}{co} "
                         f"{'AC Input Limit':<{col3}}: {m2 and c}{m2 or dev.get('ac_input_limit') or '----':>4} W{co}"
                     )
                     if isinstance(opt := dev.get("power_limit_option"), list):
@@ -1002,7 +1004,7 @@ class AnkerSolixApiMonitor:
                             if key == "limit"
                         ]
                     CONSOLE.info(
-                        f"{'Pwr Limit Opt':<{col1}}: {(opt or '------')!s:<{col2}}{co} "
+                        f"{'Pwr Limit Opt':<{col1}}: {str(opt or '------').replace(" ",""):<{col2}}{co} "
                         f"{'Limit Opt Real':<{col3}}: {(dev.get('power_limit_option_real') or '------')!s}"
                     )
                 if "pv_power_limit" in dev:

@@ -562,7 +562,7 @@ class AnkerSolixBaseApi:
                                 "ac_output_power",
                                 "ac_output_power_total",
                                 "ac_output_power_signed",
-                                "ac_output_power_signed_total",
+                                "device_output_power_signed_total",
                                 "ac_socket_power",
                                 "grid_power_signed",
                                 "grid_power_signed_l1",

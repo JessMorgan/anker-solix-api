@@ -61,6 +61,9 @@ VALUE_MIN_STATE: Final[str] = (
 VALUE_MAX_STATE: Final[str] = (
     "value_max_state"  # Defines a state name that should be used to obtain the max value of a range if found
 )
+VALUE_OPTIONS_STATE: Final[str] = (
+    "value_options_state"  # Defines a state name that should be used to obtain the valid options for field if found
+)
 VALUE_DIVIDER: Final[str] = (
     "value_divider"  # Defines a divider for the applied value, should be same as FACTOR extracting the state value data field
 )

@@ -838,23 +838,36 @@ class AnkerSolixApiExport:
                         replace=[(siteId, "<siteId>")],
                     )
                 # exporting more energy stats depending on system type
-                if site.get("site_type") == api.SolixDeviceType.SOLARBANK_PPS.value:
-                    # export PPS device related data
-                    pps = [
-                        key
-                        for key, item in self.api_power.devices.items()
-                        if item.get("site_id") == siteId
-                        and item.get("type") == api.SolixDeviceType.SOLARBANK_PPS.value
-                    ]
-                    for stat_type in [
-                        "home_usage",
-                        "pps",
-                    ]:
+                # export device related data only for multi device systems
+                devs = [
+                    key
+                    for key, item in self.api_power.devices.items()
+                    if item.get("site_id") == siteId
+                    and (
+                        item.get("type") == api.SolixDeviceType.SOLARBANK_PPS.value
+                        # ignore SB1 since they are not trackked for device energy breakdown
+                        or (
+                            item.get("type") == api.SolixDeviceType.SOLARBANK.value
+                            and item.get("generation", 2) >= 2
+                        )
+                    )
+                ]
+                if len(devs) > 1:
+                    # query device breakdown for relevant energy types
+                    types = (
+                        ["solar_production"]
+                        if site.get("site_type") == api.SolixDeviceType.SOLARBANK.value
+                        else [
+                            "home_usage",
+                            "pps",
+                        ]
+                    )
+                    for stat_type in types:
                         self._logger.info(
                             "Exporting device energy data for %s...",
                             stat_type.upper(),
                         )
-                        for sn in pps:
+                        for sn in devs:
                             await self.query(
                                 endpoint=API_ENDPOINTS["energy_analysis"],
                                 filename=f"{API_FILEPREFIXES['energy_' + stat_type]}_{self._randomize(sn, 'device_sn')}_{self._randomize(siteId, 'site_id')}.json",
@@ -870,8 +883,8 @@ class AnkerSolixApiExport:
                                 },
                                 replace=[(siteId, "<siteId>"), (sn, "<deviceSn>")],
                             )
-                else:
-                    # export PV channel data
+                elif site.get("site_type") == api.SolixDeviceType.SOLARBANK.value:
+                    # try exporting PV channel data for Solarbanks
                     for ch in ["pv" + str(num) for num in range(1, 5)] + [
                         "microinverter"
                     ]:

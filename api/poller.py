@@ -1368,16 +1368,25 @@ async def poll_device_energy(  # noqa: C901
             # they or their energy category is explicitly excluded or unused for site type
             query_types: set = set()
             query_sn: str = ""
+            parallel_sbs = []
             if site.get("site_type", "") == SolixDeviceType.SOLARBANK_PPS.value:
                 query_types.add(SolixDeviceType.SOLARBANK_PPS.value)
             else:
+                parallel_sbs = [
+                    item.get("device_sn")
+                    for item in (site.get("solarbank_info") or {}).get("solarbank_list")
+                    or []
+                    # exclude SB1 devices which are not tracked on device level
+                    if item.get("device_pn") != "A17C0"
+                ]
                 if (
                     (dev_list := site.get("solar_list") or [])
                     and isinstance(dev_list, list)
                     and (sn := dev_list[0].get("device_sn"))
                 ):
                     query_types.add(SolixDeviceType.INVERTER.value)
-                    query_sn = sn
+                    # skip SN to get total energies
+                    # query_sn = sn
                 if (
                     (dev_list := (site.get("grid_info") or {}).get("grid_list") or [])
                     and isinstance(dev_list, list)
@@ -1392,7 +1401,8 @@ async def poll_device_energy(  # noqa: C901
                         & exclude
                     ):
                         query_types.add(SolixDeviceType.SMARTMETER.value)
-                        query_sn = sn
+                        # skip SN to get total energies
+                        # query_sn = sn
                 if (
                     plug_list := (site.get("smart_plug_info") or {}).get(
                         "smartplug_list"
@@ -1408,7 +1418,8 @@ async def poll_device_energy(  # noqa: C901
                         & exclude
                     ):
                         query_types.add(SolixDeviceType.SMARTPLUG.value)
-                        query_sn = plug_list[0].get("device_sn") or ""
+                        # skip SN to get total energies
+                        # query_sn = plug_list[0].get("device_sn") or ""
                 if (
                     (
                         dev_list := (site.get("solarbank_info") or {}).get(
@@ -1428,13 +1439,17 @@ async def poll_device_energy(  # noqa: C901
                         & exclude
                     ):
                         query_types.add(SolixDeviceType.SOLARBANK.value)
-                        query_sn = sn
-                        # Query also embedded inverter energy per channel if not excluded
-                        if not (
-                            {
-                                ApiCategories.solar_energy,
-                            }
-                            & exclude
+                        # skip SN to get total energies
+                        # query_sn = sn
+                        # Query also embedded inverter energy per channel if not excluded and site is tracking it
+                        if (
+                            not (
+                                {
+                                    ApiCategories.solar_energy,
+                                }
+                                & exclude
+                            )
+                            and len(parallel_sbs) == 1
                         ):
                             query_types.add(SolixDeviceType.INVERTER.value)
 
@@ -1504,15 +1519,54 @@ async def poll_device_energy(  # noqa: C901
                             "energy_last_period": plug.get("energy"),
                         }
                     )
-                # query breakdown for solarbank PPS devices if required
-                if (
-                    len(
-                        pps_list := (site.get("solarbank_pps_info") or {}).get(
-                            "pps_list"
+                # query breakdown for Solarbank devices if required
+                if len(parallel_sbs) > 1 and not (
+                    {
+                        SolixDeviceType.SOLARBANK.value,
+                        ApiCategories.solarbank_energy,
+                    }
+                    & exclude
+                ):
+                    for sn in parallel_sbs:
+                        # obtain previous energy details to check if yesterday must be queried as well
+                        energy = api.devices.get(sn, {}).get("energy_details") or {}
+                        data = await api.energy_daily(
+                            siteId=site_id,
+                            deviceSn=sn,
+                            startDay=datetime.fromisoformat(
+                                yesterday if both else today
+                            ),
+                            numDays=2 if both else 1,
+                            dayTotals=False,  # No device breakdown for daytotals available
+                            fromFile=fromFile,
                         )
-                        or []
-                    )
-                    > 1
+                        if fromFile:
+                            # get last date entries from file and replace date with yesterday and today for testing
+                            days = len(data)
+                            if days > 1:
+                                entry: dict = list(data.values())[days - 2]
+                                entry.update({"date": yesterday})
+                                energy["last_period"] = entry
+                            if days > 0:
+                                entry: dict = list(data.values())[days - 1]
+                                entry.update({"date": today})
+                                energy["today"] = entry
+                        else:
+                            energy["today"] = data.get(today) or {}
+                            if data.get(yesterday):
+                                energy["last_period"] = data.get(yesterday) or {}
+                        # save energy stats with device dictionary
+                        api._update_dev({"device_sn": sn, "energy_details": energy})
+                # query breakdown for Solarbank PPS devices if required
+                if len(
+                    pps_list := (site.get("solarbank_pps_info") or {}).get("pps_list")
+                    or []
+                ) > 1 and not (
+                    {
+                        SolixDeviceType.SOLARBANK_PPS.value,
+                        ApiCategories.solarbank_pps_energy,
+                    }
+                    & exclude
                 ):
                     # For more than 1 PPS, query energy breakdown per device and save with device
                     for dev in pps_list:
