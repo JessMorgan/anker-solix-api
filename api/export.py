@@ -802,6 +802,7 @@ class AnkerSolixApiExport:
                     "home_usage",
                     "grid",
                     "pps",
+                    "ev_charger"
                 ]:
                     self._logger.info(
                         "Exporting site energy data for %s...",

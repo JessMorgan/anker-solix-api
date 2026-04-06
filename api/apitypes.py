@@ -555,6 +555,7 @@ API_FILEPREFIXES: Final[dict] = {
     "energy_home_usage": "energy_home_usage",
     "energy_grid": "energy_grid",
     "energy_pps": "energy_pps",
+    "energy_ev_charger": "energy_ev_charger",
     "solar_info": "solar_info",
     "compatible_process": "compatible_process",
     "get_cutoff": "power_cutoff",
@@ -927,6 +928,7 @@ class ApiCategories:
     solarbank_pps_energy: str = "solarbank_pps_energy"
     smartmeter_energy: str = "smartmeter_energy"
     smartplug_energy: str = "smartplug_energy"
+    charger_energy: str = "charger_energy"
     powerpanel_energy: str = "powerpanel_energy"
     powerpanel_avg_power: str = "powerpanel_avg_power"
     hes_energy: str = "hes_energy"

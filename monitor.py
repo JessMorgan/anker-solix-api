@@ -1445,6 +1445,9 @@ class AnkerSolixApiMonitor:
                         f"{'Home Usage ⌀':<{col3}}: {avg.get('home_usage_avg') or '-.--':>5} {unit}"
                     )
                     CONSOLE.info(
+                        f"{'EV Charge Pwr ⌀':<{col1}}: {avg.get('ev_charge_power_avg') or '-.--':>5} {unit:<{col2 - 6}} "
+                    )
+                    CONSOLE.info(
                         f"{'Charge Power ⌀':<{col1}}: {avg.get('charge_power_avg') or '-.--':>5} {unit:<{col2 - 6}} "
                         f"{'Discharge Pwr ⌀':<{col3}}: {avg.get('discharge_power_avg') or '-.--':>5} {unit}"
                     )
@@ -2585,6 +2588,20 @@ class AnkerSolixApiMonitor:
                                     f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
                                     f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
                                 )
+                    if value := today.get("ev_charge") or m1:
+                        CONSOLE.info(
+                            f"{'EV Charge':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'EV Charge':<{col3}}: {yesterday.get('ev_charge') or '-.--':>6} {unit}"
+                        )
+                        for key, item in dev_energies.items():
+                            if t := (item.get("today") or {}).get("ev_charge"):
+                                y = (item.get("last_period") or {}).get(
+                                    "ev_charge"
+                                )
+                                CONSOLE.info(
+                                    f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
+                                    f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
+                                )
                     if m1 := c and mqtt.get("generator_energy_today", ""):
                         m1 = f"{float(m1):.2f}"
                     if value := today.get("generator_energy") or m1:
@@ -2774,7 +2791,7 @@ class AnkerSolixApiMonitor:
                     now = datetime.now().astimezone()
                     if self.next_refr <= now:
                         # Ask whether monitor should be limited to selected site ID
-                        if not (self.use_file or site_names):
+                        if not site_names:
                             CONSOLE.info("Getting site list...")
                             sites = (
                                 await self.api.get_site_list(fromFile=self.use_file)
@@ -2808,6 +2825,7 @@ class AnkerSolixApiMonitor:
                                     self.site_selected = site_names[
                                         int(selection)
                                     ].split(",", maxsplit=1)[0]
+                        if not self.use_file:
                             # ask which endpoint limit should be applied or use command line arg
                             if self.interactive:
                                 selection = await self.async_inupt(

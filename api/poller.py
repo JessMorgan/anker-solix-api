@@ -388,18 +388,9 @@ async def poll_sites(  # noqa: C901
                         batt_discharge = int(solarbank.get("bat_discharge_power") or 0)
                         # Fix for output power showing wrong values in multisystems, while new battery charge and discharge fields seem to be ok
                         if multisystem:
-                            # ceil output which must not be smaller than PV + discharge, considering no losses according to other cloud calculations
-                            if (batt_discharge + power_in) > power_out:
-                                power_out = batt_discharge + power_in
-                                solarbank["output_power"] = f"{power_out:.0f}"
-                            # cap output which must not be larger than PV +/- net battery power
-                            elif (
-                                0
-                                < (power_in - batt_charge + batt_discharge)
-                                < power_out
-                            ):
-                                power_out = power_in - batt_charge + batt_discharge
-                                solarbank["output_power"] = f"{power_out:.0f}"
+                            # calculate output which must PV + battery power, considering no losses according to other cloud calculations
+                            power_out = power_in - batt_charge + batt_discharge
+                            # solarbank["output_power"] = f"{power_out:.0f}" # output power should be fixed now
                             # breakdown of grid charge which is provided for all solarbanks
                             if grid_in > 0:
                                 # grid charge should be battery charge - pv charge
@@ -494,7 +485,11 @@ async def poll_sites(  # noqa: C901
                             "grid_to_battery_power": str(sb_grid_charge),
                             "pei_heating_power": solarbank.get("heating_power")
                             or sb_info.get("pei_heating_power"),
-                            "to_home_load": sb_info.get("to_home_load"),
+                            "to_home_load": solarbank.get("output_power")
+                            if multisystem
+                            else sb_info.get(
+                                "to_home_load"
+                            ),  # Wrong for multisystem (always first device only)
                             # demand only passed to device for proper SB2+ charge status update
                             "home_load_power": mysite.get("home_load_power"),
                         },
@@ -545,6 +540,10 @@ async def poll_sites(  # noqa: C901
                     # In multisystem there should not be parallel charge and discharge of batteries, therefore (calculated) device values should reflect net total
                     mysite["solarbank_info"]["total_charging_power"] = (
                         f"{sb_total_charge_calc:.0f}"
+                    )
+                    # Correct home load, since that reflects only first solarbank home load value
+                    mysite["solarbank_info"]["to_home_load"] = (
+                        f"{sb_total_output_calc:.0f}"
                     )
                     # TODO(MULTISYSTEM): Adjust other totals as necessary once value examples are available
                     # adjust breakdown for multisystem if possible
@@ -1404,10 +1403,14 @@ async def poll_device_energy(  # noqa: C901
                         # skip SN to get total energies
                         # query_sn = sn
                 if (
-                    plug_list := (site.get("smart_plug_info") or {}).get(
-                        "smartplug_list"
+                    (
+                        dev_list := (site.get("smart_plug_info") or {}).get(
+                            "smartplug_list"
+                        )
+                        or []
                     )
-                    or []
+                    and isinstance(dev_list, list)
+                    and (sn := dev_list[0].get("device_sn"))
                 ):
                     query_types.discard(SolixDeviceType.INVERTER.value)
                     if not (
@@ -1419,7 +1422,23 @@ async def poll_device_energy(  # noqa: C901
                     ):
                         query_types.add(SolixDeviceType.SMARTPLUG.value)
                         # skip SN to get total energies
-                        # query_sn = plug_list[0].get("device_sn") or ""
+                        # query_sn = sn
+                if (
+                    (dev_list := (site.get("charging_pile_info") or {}).get("charging_pile_list") or [])
+                    and isinstance(dev_list, list)
+                    and (sn := dev_list[0].get("device_sn"))
+                ):
+                    query_types.discard(SolixDeviceType.INVERTER.value)
+                    if not (
+                        {
+                            SolixDeviceType.EV_CHARGER.value,
+                            ApiCategories.charger_energy,
+                        }
+                        & exclude
+                    ):
+                        query_types.add(SolixDeviceType.EV_CHARGER.value)
+                        # skip SN to get total energies
+                        # query_sn = sn
                 if (
                     (
                         dev_list := (site.get("solarbank_info") or {}).get(

@@ -620,7 +620,15 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                 }
                 & exclude
             ):
-                query_types: set = {SolixDeviceType.HES.value}
+                query_types.add(SolixDeviceType.HES.value)
+            if (
+                site.get("hes_info", {}).get("hasEvCharger")
+                and {
+                    ApiCategories.charger_energy,
+                }
+                - exclude
+            ):
+                query_types.add(SolixDeviceType.EV_CHARGER.value)
             if query_types:
                 self._logger.debug(
                     "Getting api %s HES energy details for site",
@@ -814,6 +822,8 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
         """
         # get existing data first from site details to check if requery must be done
         avg_data = (self.devices.get(mainSn) or {}).get("average_power") or {}
+        # check if ev charger need to be queried
+        has_charger = self.sites.get(siteId, {}).get("hes_info", {}).get("hasEvCharger")
         # Collect todays totals in new entry for re-use to avoid redundant daily energy polls
         entry: dict = {}
         # verify last runtime and avoid re-query in less than 5 minutes since no new values available in energy stats
@@ -829,7 +839,9 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
             validtime = datetime.now() + offset
             validdata = {}
             old_valid = avg_data.get("valid_time") or ""
-            for source in ["hes", "solar", "home", "grid"]:
+            for source in ["hes", "solar", "home", "grid"] + (
+                ["evCharger"] if has_charger else []
+            ):
                 # check for initial or updated min offset, using SOC value in hes data because that should never be 0 for a valid timestamp
                 if source == "hes":
                     future = ""
@@ -1016,6 +1028,16 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                             avg_data["grid_export_avg"] = "0.00"
                         # get interval totals from aggregate to avoid redundant daily query for today
                         entry.update(self.extract_energy(source=source, data=data))
+                    elif source == "evCharger":
+                        avg_data["ev_charge_power_avg"] = (
+                            next(
+                                iter(powerlist[-1].get("powerInfos") or []),
+                                {},
+                            ).get("value")
+                            or ""
+                        )
+                        # get interval totals from aggregate to avoid redundant daily query for today
+                        entry.update(self.extract_energy(source=source, data=data))
             # Add average power to main device details as work around if no other hes device usage data will be found in cloud
             if avg_data and mainSn in self.devices:
                 self._update_dev({"device_sn": mainSn, "average_power": avg_data})
@@ -1037,7 +1059,7 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
         rangeType: "day" | "week" | "year"
         startTime: optional start Date and time
         endTime: optional end Date and time
-        devType: "solar" | "hes" | "grid" | "home"
+        devType: "solar" | "hes" | "grid" | "home" | "evCharger" | "otherLoad",
         Example Data for solar_production:
         {"power": [{"time": "2025-02-01","value": "0"},{"time": "2025-02-02","value": "0"}],
         "charge_trend": null,"charge_level": [],"power_unit": "wh","charge_total": "0.00","charge_unit": "kwh","discharge_total": "0.00","discharge_unit": "kwh",
@@ -1056,11 +1078,13 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
         Daily: Home Usage Energy, Extra Totals: grid_to_home, battery_to_home, solar_to_home, 3 x percentage share home usage source
         Responses for grid:
         Daily: Grid import, Extra Totals: solar_to_grid, battery_to_grid, grid_to_home, grid_to_battery, 2 x percentage share how import used and 2 x export share
+        Responses for evCharger:
+        Daily: EV Charger usage
         """
         data = {
             "siteId": siteId,
             "sourceType": sourceType
-            if sourceType in ["solar", "hes", "home", "grid"]
+            if sourceType in ["solar", "hes", "home", "grid", "evCharger", "otherLoad"]
             else "solar",
             "dateType": rangeType if rangeType in ["day", "week", "year"] else "day",
             "start": startDay.strftime("%Y-%m-%d")
@@ -1277,6 +1301,54 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
             if showProgress:
                 self._logger.info(
                     "Received api %s home energy for period",
+                    self.apisession.nickname,
+                )
+
+        # Add EV charger usage
+        source = "evCharger"
+        if SolixDeviceType.EV_CHARGER.value in devTypes:
+            # get first data period from file or api
+            if fromFile:
+                resp = (
+                    await self.apisession.loadFromFile(
+                        Path(self.testDir())
+                        / f"{API_FILEPREFIXES['hes_energy_evCharger']}_{siteId}.json"
+                    )
+                ).get("data", {})
+            else:
+                resp = await self.energy_statistics(
+                    siteId=siteId,
+                    rangeType="week",
+                    startDay=startDay,
+                    # query only 1 day if daytotals requested
+                    endDay=startDay
+                    if dayTotals
+                    else startDay + timedelta(days=numDays - 1),
+                    sourceType=source,
+                )
+            unit = resp.get("energyUnit") or ""
+            items = resp.get("energy") or []
+            # No daystring in response, count the index for proper date and skip previous items
+            # for file usage ensure that last item is used if today is included
+            start = (
+                len(items) - 1
+                if fromFile and datetime.now().date() == startDay.date()
+                else 0
+            )
+            for idx, item in enumerate(items[start : start + numDays]):
+                daystr = (startDay + timedelta(days=idx)).strftime("%Y-%m-%d")
+                entry = table.get(daystr, {"date": daystr})
+                entry.update(
+                    {
+                        "ev_charge": convertToKwh(
+                            val=item.get("value") or None, unit=unit
+                        ),
+                    }
+                )
+                table.update({daystr: entry})
+            if showProgress:
+                self._logger.info(
+                    "Received api %s EV charger energy for period",
                     self.apisession.nickname,
                 )
 
@@ -1560,6 +1632,15 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                         "solar_production": convertToKwh(
                             val=data.get("totalExportedEnergy") or None,
                             unit=data.get("totalExportedEnergyUnit") or "",
+                        ),
+                    }
+                )
+            elif source == "evCharger":
+                entry.update(
+                    {
+                        "ev_charge": convertToKwh(
+                            val=data.get("totalImportedEnergy") or None,
+                            unit=data.get("totalImportedEnergyUnit") or "",
                         ),
                     }
                 )
