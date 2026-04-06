@@ -2516,6 +2516,20 @@ class AnkerSolixApiMonitor:
                                     f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
                                     f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
                                 )
+                    if value := today.get("ev_charge") or m1:
+                        CONSOLE.info(
+                            f"{'EV Charge Usage':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
+                            f"{'EV Charge Usage':<{col3}}: {yesterday.get('ev_charge') or '-.--':>6} {unit}"
+                        )
+                        for key, item in dev_energies.items():
+                            if t := (item.get("today") or {}).get("ev_charge"):
+                                y = (item.get("last_period") or {}).get(
+                                    "ev_charge"
+                                )
+                                CONSOLE.info(
+                                    f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
+                                    f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
+                                )
                     if m1 := c and mqtt.get("grid_consumption_today", ""):
                         m1 = f"{float(m1):.2f}"
                     if value := today.get("grid_to_home") or m1:
@@ -2583,20 +2597,6 @@ class AnkerSolixApiMonitor:
                             ):
                                 y = (item.get("last_period") or {}).get(
                                     "3rd_party_pv_to_grid"
-                                )
-                                CONSOLE.info(
-                                    f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
-                                    f"{'-' + key:<{col3}}: {y or '-.--':>6} {unit}"
-                                )
-                    if value := today.get("ev_charge") or m1:
-                        CONSOLE.info(
-                            f"{'EV Charge':<{col1}}: {m1 and c}{m1 or value or '-.--':>6} {unit:<{col2 - 7}}{co} "
-                            f"{'EV Charge':<{col3}}: {yesterday.get('ev_charge') or '-.--':>6} {unit}"
-                        )
-                        for key, item in dev_energies.items():
-                            if t := (item.get("today") or {}).get("ev_charge"):
-                                y = (item.get("last_period") or {}).get(
-                                    "ev_charge"
                                 )
                                 CONSOLE.info(
                                     f"{'-' + key:<{col1}}: {t or '-.--':>6} {unit:<{col2 - 7}} "
@@ -2825,7 +2825,7 @@ class AnkerSolixApiMonitor:
                                     self.site_selected = site_names[
                                         int(selection)
                                     ].split(",", maxsplit=1)[0]
-                        if not self.use_file:
+                        if not (self.use_file or site_names):
                             # ask which endpoint limit should be applied or use command line arg
                             if self.interactive:
                                 selection = await self.async_inupt(
