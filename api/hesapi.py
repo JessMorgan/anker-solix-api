@@ -114,24 +114,34 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                     if key in ["product_code", "device_pn"] and value:
                         device.update({"device_pn": str(value)})
                         # try to get capacity from category definitions
-                        if hasattr(SolixDeviceCapacity, str(value)):
+                        if (
+                            hasattr(SolixDeviceCapacity, str(value))
+                            and "battery_capacity" not in device
+                        ):
                             # get battery capacity from known PNs
                             device["battery_capacity"] = str(
                                 getattr(SolixDeviceCapacity, str(value))
                             )
+                            calc_capacity = True
                         # try to get type for standalone device from category definitions if not defined yet
-                        if hasattr(SolixDeviceCategory, str(value)):
+                        if (
+                            hasattr(SolixDeviceCategory, str(value))
+                            and "type" not in device
+                        ):
                             dev_type = str(
                                 getattr(SolixDeviceCategory, str(value))
                             ).split("_")
-                            if "type" not in device:
-                                device.update({"type": dev_type[0]})
+                            if dev_type[-1].isdigit():
+                                gen = int(dev_type.pop(-1))
+                            else:
+                                gen = None
+                            device["type"] = "_".join(dev_type)
                             # update generation if specified in device type definitions
-                            if len(dev_type) > 1:
-                                device.update({"generation": int(dev_type[1])})
+                            if gen:
+                                device["generation"] = gen
                     elif key == "device_name":
                         if value:
-                            device.update({"name": str(value)})
+                            device["name"] = str(value)
                         elif (
                             pn := device.get("device_pn")
                             or devData.get("device_pn")
@@ -195,7 +205,12 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                         # init calculated fields with 0 if not existing
                         if "battery_capacity" not in device:
                             device["battery_capacity"] = "0"
-                        if not (cap := device.get("battery_capacity")) or calc_capacity:
+                        is_primary = device.get("is_primary") or devData.get(
+                            "is_primary"
+                        )
+                        if (
+                            not (cap := device.get("battery_capacity")) or calc_capacity
+                        ) and is_primary:
                             cap = 0
                             for dev in [
                                 d
@@ -219,7 +234,7 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                         # Calculate remaining energy in Wh and add values
                         # Calculate energy only for primary device
                         site_id = device.get("site_id", "")
-                        if device.get("is_primary") or devData.get("is_primary"):
+                        if is_primary:
                             prim_dev = device
                         else:
                             prim_dev = next(
@@ -373,6 +388,24 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                         self._update_account(
                             {"products": await self.get_products(fromFile=fromFile)}
                         )
+                    # Add any missing site device to cache
+                    for dev in [
+                        d
+                        for d in mysite.get("site_info", {}).get("site_device_list")
+                        or []
+                        if (sn := d.get("device_sn")) and sn not in self._site_devices
+                    ]:
+                        self._update_dev(
+                            {
+                                "device_sn": dev.get("device_sn"),
+                                "device_pn": dev.get("device_model"),
+                                "alias": dev.get("device_name"),
+                                "status": dev.get("status"),
+                            },
+                            siteId=myid,
+                            isAdmin=admin,
+                        )
+                        self._site_devices.add(sn)
                     # query site device info if not provided in site Data
                     run_info = {}
                     if not (
@@ -418,7 +451,6 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                                     "device_pn": subdev.get("pn") or "",
                                     "device_name": "",
                                 },
-                                devType=SolixDeviceType.HES.value,
                                 siteId=myid,
                                 isAdmin=admin,
                             ):
@@ -436,7 +468,6 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                                 "device_name": "",
                                 "batCount": batcount,
                             },
-                            devType=SolixDeviceType.HES.value,
                             siteId=myid,
                             isAdmin=admin,
                         ):
@@ -805,12 +836,10 @@ class AnkerSolixHesApi(AnkerSolixBaseApi):
                 self._update_dev(
                     {
                         "device_sn": ev_charger.get("evChargerSn"),
-                        "alias_name": ev_charger.get("evChargerName"),
+                        # "alias_name": ev_charger.get("evChargerName"),
                         "ev_charger_status": ev_charger.get("evChargerStatus"),
                     },
-                    siteId=siteId,
                 )
-                self._site_devices.add(ev_charger.get("evChargerSn"))
         return data
 
     async def get_avg_power_from_energy(

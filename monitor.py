@@ -704,7 +704,7 @@ class AnkerSolixApiMonitor:
             else:
                 CONSOLE.info("-" * 80)
             CONSOLE.info(
-                f"{'Device [' + dev.get('device_pn', '') + ']':<{col1}}: {c or Color.MAG}{(dev.get('name', 'NoName')):<{col2}}{co} "
+                f"{'Device [' + dev.get('device_pn', '') + ']':<{col1}}: {c or Color.MAG}{(dev.get('name', 'NoName').strip()):<{col2}}{co} "
                 f"{'Alias':<{col3}}: {c or Color.MAG}{dev.get('alias', 'Unknown')}{co}"
             )
             CONSOLE.info(

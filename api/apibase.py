@@ -543,7 +543,7 @@ class AnkerSolixBaseApi:
                                 "max_soc",
                                 "temperature",
                                 "photovoltaic_power",
-                                "pv_power_3rd_party",  # HA not usable in system entity
+                                "pv_power_3rd_party",
                                 "pv_power_total",
                                 "dc_input_power",
                                 "dc_input_power_total",
@@ -592,14 +592,14 @@ class AnkerSolixBaseApi:
                                 "system_output_power_signed_l2",
                                 "wifi_signal",
                                 "charging_power",
-                                "power_l1",  # HA missing
-                                "power_l2",  # HA missing
-                                "power_l3",  # HA missing
-                                "min_current_limit",  # HA missing
-                                "max_current_limit",  # HA missing
-                                "main_breaker_limit",  # HA missing
-                                "max_evcharge_current",  # HA missing
-                                "solar_evcharge_min_current",  # HA missing
+                                "power_l1",
+                                "power_l2",
+                                "power_l3",
+                                "min_current_limit",
+                                "max_current_limit",
+                                "main_breaker_limit",
+                                "max_evcharge_current",
+                                "solar_evcharge_min_current",
                                 "light_brightness",
                             ]
                             or (
@@ -623,12 +623,9 @@ class AnkerSolixBaseApi:
                                 "power",
                                 "current",
                                 "power_factor",
-                                "system_output_current_l1",
-                                "system_output_current_l2",
-                                "system_output_current_l3",
                             ]
                             or str(key).startswith(
-                                ("home_demand_circuit_", "voltage_", "current_")
+                                ("home_demand_circuit_", "voltage_", "current_", "system_output_current_")
                             )
                             or str(key).endswith(("_voltage", "_current"))
                             or (
@@ -638,7 +635,7 @@ class AnkerSolixBaseApi:
                         ) and str(value).replace("-", "", 1).replace(
                             ".", "", 1
                         ).isdigit():
-                            device_mqtt[key] = f"{float(value):.0f}"
+                            device_mqtt[key] = f"{float(value):.3f}"
                         elif (
                             key
                             in [

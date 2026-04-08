@@ -146,7 +146,7 @@ async def poll_sites(  # noqa: C901
             ]:
                 api._update_dev(
                     {
-                        "device_sn": sn,
+                        "device_sn": dev.get("device_sn"),
                         "device_pn": dev.get("device_model"),
                         "alias": dev.get("device_name"),
                         "status": dev.get("status"),
@@ -493,7 +493,6 @@ async def poll_sites(  # noqa: C901
                             # demand only passed to device for proper SB2+ charge status update
                             "home_load_power": mysite.get("home_load_power"),
                         },
-                        devType=SolixDeviceType.SOLARBANK.value,
                         siteId=myid,
                         isAdmin=admin,
                     ):
@@ -623,7 +622,6 @@ async def poll_sites(  # noqa: C901
                                 ),
                                 "grid_status": grid_info.get("grid_status", ""),
                             },
-                            devType=SolixDeviceType.SMARTMETER.value,
                             siteId=myid,
                             isAdmin=admin,
                         ):
@@ -637,7 +635,6 @@ async def poll_sites(  # noqa: C901
                             smartplug["alias_name"] = smartplug.pop("device_name")
                         if sn := api._update_dev(
                             smartplug,
-                            devType=SolixDeviceType.SMARTPLUG.value,
                             siteId=myid,
                             isAdmin=admin,
                         ):
@@ -651,7 +648,6 @@ async def poll_sites(  # noqa: C901
                             pps["alias_name"] = pps.pop("device_name")
                         if sn := api._update_dev(
                             pps,
-                            devType=SolixDeviceType.PPS.value,
                             siteId=myid,
                             isAdmin=admin,
                         ):
@@ -687,7 +683,6 @@ async def poll_sites(  # noqa: C901
                         sbpps["to_home_load"] = sbpps.pop("home_load_power", "")
                         if sn := api._update_dev(
                             sbpps,
-                            devType=SolixDeviceType.SOLARBANK_PPS.value,
                             siteId=myid,
                             isAdmin=admin,
                         ):
@@ -759,7 +754,6 @@ async def poll_sites(  # noqa: C901
                         )
                     if sn := api._update_dev(
                         cb,
-                        devType=SolixDeviceType.COMBINER_BOX.value,
                         siteId=myid,
                         isAdmin=admin,
                     ):
@@ -776,7 +770,6 @@ async def poll_sites(  # noqa: C901
                         cp["bat_charge_power"] = cp.pop("power", "")
                         if sn := api._update_dev(
                             cp,
-                            devType=SolixDeviceType.EV_CHARGER.value,
                             siteId=myid,
                             isAdmin=admin,
                         ):
@@ -789,7 +782,6 @@ async def poll_sites(  # noqa: C901
                         solar.update({"alias_name": solar.pop("device_name")})
                     if sn := api._update_dev(
                         solar,
-                        devType=SolixDeviceType.INVERTER.value,
                         siteId=myid,
                         isAdmin=admin,
                     ):
@@ -802,7 +794,6 @@ async def poll_sites(  # noqa: C901
                         powerpanel.update({"alias_name": powerpanel.pop("device_name")})
                     if sn := api._update_dev(
                         powerpanel,
-                        devType=SolixDeviceType.POWERPANEL.value,
                         siteId=myid,
                         isAdmin=admin,
                     ):

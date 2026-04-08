@@ -118,7 +118,6 @@ class AnkerSolixApi(AnkerSolixBaseApi):
     def _update_dev(  # noqa: C901
         self,
         devData: dict,
-        devType: str | None = None,
         siteId: str | None = None,
         isAdmin: bool | None = None,
     ) -> str | None:
@@ -129,8 +128,6 @@ class AnkerSolixApi(AnkerSolixBaseApi):
         if sn := devData.pop("device_sn", None):
             device: dict = self.devices.get(sn) or {}  # lookup old device info if any
             device["device_sn"] = str(sn)
-            if devType:
-                device["type"] = devType.lower()
             if siteId:
                 device["site_id"] = str(siteId)
             if isAdmin is not None:
@@ -178,16 +175,18 @@ class AnkerSolixApi(AnkerSolixBaseApi):
                         ):
                             calc_capacity = True
                         # try to get type for standalone device from category definitions if not defined yet
-                        if hasattr(SolixDeviceCategory, str(value)):
+                        if hasattr(SolixDeviceCategory, str(value)) and "type" not in device:
                             dev_type = str(
                                 getattr(SolixDeviceCategory, str(value))
                             ).split("_")
-                            # update generation if specified in device type definitions
-                            if len(dev_type) > 1 and str(dev_type[-1:][0]).isdigit():
-                                device["generation"] = int(dev_type[-1:][0])
-                                device["type"] = "_".join(dev_type[:-1])
+                            if dev_type[-1].isdigit():
+                                gen = int(dev_type.pop(-1))
                             else:
-                                device["type"] = "_".join(dev_type)
+                                gen = None
+                            device["type"] = "_".join(dev_type)
+                            # update generation if specified in device type definitions
+                            if gen:
+                                device["generation"] = gen
                     elif key == "device_name" and value:
                         device["name"] = str(value)
                     elif key == "alias_name" and value:
