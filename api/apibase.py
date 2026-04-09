@@ -520,6 +520,8 @@ class AnkerSolixBaseApi:
                                     "weekend_end_time",  # HA missing
                                     "load_balance_monitor_device",  # not used in HA
                                     "solar_evcharge_monitor_device",  # not used in HA
+                                    "load_balance_setting_d5", # Unknown control parameter state value
+                                    "load_balance_setting_d6", # Unknown control parameter state value
                                 ]
                                 or (
                                     key.startswith(("device_", "exp_", "pps_"))

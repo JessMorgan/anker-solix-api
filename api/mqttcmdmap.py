@@ -1249,11 +1249,11 @@ CMD_EV_SOLAR_CHARGING = CMD_COMMON | {
         VALUE_STEP: 1,
     },
     "a5": {
-        NAME: "set_phase_operating_mode?",  # one phase(1) / 3 phase(3) ?
+        NAME: "set_phase_operating_mode?",  # auto (0) / one phase(1) / 3 phase(3) ?
         TYPE: DeviceHexDataTypes.ui.value,
         STATE_NAME: "phase_operating_mode",
         VALUE_STATE: "phase_operating_mode",
-        VALUE_OPTIONS: {"one_phase": 1, "three_phase": 3},
+        VALUE_OPTIONS: {"automatic":0, "one_phase": 1},
     },
     "a6": {
         NAME: "set_solar_evcharge_monitoring_mode",
@@ -1288,7 +1288,7 @@ CMD_EV_CHARGER_SCHEDULE_SETTINGS = CMD_COMMON | {
         VALUE_OPTIONS: {"off": 2, "on": 1},
     },
     "a8": {
-        NAME: "schedule_mode",  # normal (0), smart (1)
+        NAME: "set_schedule_mode",  # normal (0), smart (1)
         TYPE: DeviceHexDataTypes.ui.value,
         STATE_NAME: "schedule_mode",
         VALUE_STATE: "schedule_mode",
