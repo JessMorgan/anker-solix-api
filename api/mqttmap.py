@@ -3479,7 +3479,7 @@ _EV_CHARGER_0405 = {
     TOPIC: "param_info",
     "a2": {NAME: "unknown_limit?"},
     # "a3": {NAME: "ocpp_connect_status?"},  # disconnected(0), connecting(1), connected(2)
-    "a3": {NAME: "plug_lock_switch"},  # Off(1), On(2)
+    "a3": {NAME: "plug_lock_switch"},  # On (1), Off (2) !
     "a4": {NAME: "auto_start_switch"},  # Off (0), On (1)
     "a8": {
         NAME: "max_evcharge_current",
@@ -3523,7 +3523,7 @@ _EV_CHARGER_0405 = {
     "e2": {NAME: "plug_status"},  # Disconnected (0), Connected (1)
     "e3": {NAME: "ev_charger_status"},
     # Standby(0), Preparing(1), Charging(2), Charger_Paused(3), Vehicle_Paused(4), Completed (5), Reserving(6), Disabled(7), Error(8)
-    "e6": {NAME: "schedule_switch"},  # on (1), off (2)
+    "e6": {NAME: "schedule_switch"},  # on (1), off (2) !
     "e7": {NAME: "week_start_time", SIGNED: False},  # sile: hour * 256 + sec
     "e8": {NAME: "week_end_time", SIGNED: False},  # sile: hour * 256 + sec
     "e9": {NAME: "weekend_start_time", SIGNED: False},  # sile: hour * 256 + sec
@@ -3788,7 +3788,7 @@ SOLIXMQTTMAP: Final[dict] = {
     },
     # PPS C1000(X) + B1000 Extension
     "A1761": {
-        "0044": CMD_DEVICE_MAX_LOAD  # TODO: Range to be confirmed: Range: 100-2000 W, Step: 100 W
+        "0044": CMD_DEVICE_MAX_LOAD
         | {
             "a2": {
                 **CMD_DEVICE_MAX_LOAD["a2"],
@@ -3936,7 +3936,7 @@ SOLIXMQTTMAP: Final[dict] = {
             },
             SolixMqttCommands.display_timeout_seconds: CMD_COMMON_V2
             | {
-                "a4": {  # TODO: Find correct status field in message group
+                "a4": {
                     NAME: "set_display_timeout_sec",  # 0 (Never), 10, 20, 30, 60, 300, 1800
                     TYPE: DeviceHexDataTypes.sile.value,
                     STATE_NAME: "display_timeout_seconds",
@@ -4938,7 +4938,7 @@ SOLIXMQTTMAP: Final[dict] = {
                 SolixMqttCommands.light_off_schedule,  # field b4, b5, b6
                 SolixMqttCommands.modbus_switch,  # field b7
             ],
-            SolixMqttCommands.plug_lock_switch: CMD_PLUG_LOCK_SWITCH,  # Off (1), On (2) !
+            SolixMqttCommands.plug_lock_switch: CMD_PLUG_LOCK_SWITCH,  # On (1), Off (2) !
             SolixMqttCommands.ev_auto_start_switch: CMD_EV_AUTO_START_SWITCH,  # Off (0), On (1)
             SolixMqttCommands.ev_max_charge_current: CMD_EV_MAX_CHARGE_CURRENT,  # min limit to max limit (e.g. 6-32 A, step 1 A)
             SolixMqttCommands.ev_auto_charge_restart_switch: CMD_EV_AUTO_CHARGE_RESTART_SWITCH,  # Off (0), On (1)

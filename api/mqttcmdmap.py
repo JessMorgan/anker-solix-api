@@ -1022,10 +1022,10 @@ CMD_PLUG_LOCK_SWITCH = CMD_COMMON | {
     # Command: EV Charger plug lock switch setting
     COMMAND_NAME: SolixMqttCommands.plug_lock_switch,
     "a3": {
-        NAME: "set_plug_lock_switch",  # Off (1), On (2) !
+        NAME: "set_plug_lock_switch",  # On (1), Off (2) !
         TYPE: DeviceHexDataTypes.ui.value,
         STATE_NAME: "plug_lock_switch",
-        VALUE_OPTIONS: {"off": 1, "on": 2},
+        VALUE_OPTIONS: {"on": 1, "off": 2},
     },
 }
 
@@ -1249,7 +1249,7 @@ CMD_EV_SOLAR_CHARGING = CMD_COMMON | {
         VALUE_STEP: 1,
     },
     "a5": {
-        NAME: "set_phase_operating_mode?",  # auto (0) / one phase(1) / 3 phase(3) ?
+        NAME: "set_phase_operating_mode?",  # auto (0) / one phase(1) / 3 phase(3)- not seen yet ?
         TYPE: DeviceHexDataTypes.ui.value,
         STATE_NAME: "phase_operating_mode",
         VALUE_STATE: "phase_operating_mode",
@@ -1285,7 +1285,7 @@ CMD_EV_CHARGER_SCHEDULE_SETTINGS = CMD_COMMON | {
         TYPE: DeviceHexDataTypes.ui.value,
         STATE_NAME: "schedule_switch",
         VALUE_STATE: "schedule_switch",
-        VALUE_OPTIONS: {"off": 2, "on": 1},
+        VALUE_OPTIONS: {"on": 1, "off": 2},
     },
     "a8": {
         NAME: "set_schedule_mode",  # normal (0), smart (1)

@@ -17,6 +17,7 @@ from .mqttcmdmap import (
     NAME,
     OFFSET,
     SIGNED,
+    STATE_NAME,
     TYPE,
     VALUE_DEFAULT,
     VALUE_DIVIDER,
@@ -649,7 +650,7 @@ class DeviceHexDataField:
         if not isinstance(desc, dict):
             desc = {}
         options = desc.get(VALUE_OPTIONS, {})
-        if desc.get(NAME, "").endswith("_time"):
+        if (desc.get(NAME, "") or desc.get(STATE_NAME, "")).endswith("_time"):
             # special case for time strings HH:MM[:SS], convert to bytes already
             fieldvalue = convert_time(str(value)) or bytes.fromhex("000000")
         elif isinstance(value, str | int | float):

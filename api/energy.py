@@ -969,7 +969,15 @@ async def energy_analysis(
         "device_sn": deviceSn,
         "device_type": devType
         if (
-            devType in ["solar_production", "solarbank", "home_usage", "grid", "pps", "ev_charger"]
+            devType
+            in [
+                "solar_production",
+                "solarbank",
+                "home_usage",
+                "grid",
+                "pps",
+                "ev_charger",
+            ]
             or "solar_production_" in devType
         )
         else "solar_production",
@@ -1260,16 +1268,7 @@ async def refresh_pv_forecast(
     fcdetails["produced_initially"] = (
         "0"
         if "00:00" in (ts := (trend[:1] or [{}])[0].get("timestamp") or "")
-        else f"{
-            sum(
-                [
-                    float(slot.get('power'))
-                    for slot in produced
-                    if str(slot.get('timestamp')) < ts
-                    and str(slot.get('power')).replace('.', '', 1).isdigit()
-                ]
-            )
-            / (1 if 'k' in unit.lower() else 1000):.2f}"
+        else f"{sum([float(slot.get('power')) for slot in produced if str(slot.get('timestamp')) < ts and str(slot.get('power')).replace('.', '', 1).isdigit()]) / (1 if 'k' in unit.lower() else 1000):.2f}"
     )
     # calculate total forecast of today
     daily_kwh = sum(

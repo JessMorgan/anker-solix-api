@@ -1636,6 +1636,8 @@ class SolixEvChargerMode(StrEnum):
     skip_delay = "3"
     boost_charge = "4"
     unknown = "unknown"
+    wait_start = "wait_start" # Virtual mode not usable as control value
+    wait_plug = "wait_plug" # Virtual mode not usable as control value
 
 
 class SolixEvChargerWipeMode(StrEnum):

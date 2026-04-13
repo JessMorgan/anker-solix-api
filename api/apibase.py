@@ -520,8 +520,8 @@ class AnkerSolixBaseApi:
                                     "weekend_end_time",  # HA missing
                                     "load_balance_monitor_device",  # not used in HA
                                     "solar_evcharge_monitor_device",  # not used in HA
-                                    "load_balance_setting_d5", # Unknown control parameter state value
-                                    "load_balance_setting_d6", # Unknown control parameter state value
+                                    "load_balance_setting_d5",  # Unknown control parameter state value
+                                    "load_balance_setting_d6",  # Unknown control parameter state value
                                 ]
                                 or (
                                     key.startswith(("device_", "exp_", "pps_"))
@@ -627,7 +627,12 @@ class AnkerSolixBaseApi:
                                 "power_factor",
                             ]
                             or str(key).startswith(
-                                ("home_demand_circuit_", "voltage_", "current_", "system_output_current_")
+                                (
+                                    "home_demand_circuit_",
+                                    "voltage_",
+                                    "current_",
+                                    "system_output_current_",
+                                )
                             )
                             or str(key).endswith(("_voltage", "_current"))
                             or (
@@ -655,6 +660,7 @@ class AnkerSolixBaseApi:
                             if (
                                 str(key).startswith("charging_")
                                 or str(key).endswith("_today")
+                                # remaining aggregated energies must increase to be updated in cache
                                 or 0 < float(value) > float(device_mqtt.get(key, 0))
                             ):
                                 device_mqtt[key] = f"{float(value):.3f}"
@@ -830,8 +836,22 @@ class AnkerSolixBaseApi:
                                     float(charge),
                                     max(0, float(out) + float(charge) - float(pv)),
                                 )
+                        elif not charge:
+                            # calculate charge if discharge available but charge not
+                            # Out = PV - battery loss, where battery loss = charge - discharge
+                            # charge = PV - Out + discharge
+                            if pv and out:
+                                charge = max(
+                                    float(discharge),
+                                    float(pv) - float(out) + float(discharge),
+                                )
                         # consider consumed energy for efficiency, since that probably reduces the reported pv_yield and charge energy
                         consumed = device_mqtt.get("consumed_energy") or 0
+                        # Consumed = loss + ac socket ?
+                        # Battery loss = charge - discharge
+                        # Out = PV + AC charge - loss - battery loss
+                        # Out = PV + AC charge - (consumed - AC socket) - charge + discharge
+                        # AC charge = Out - PV + consumed - AC socket - discharge + charge
                         # First calculate optional AC charge
                         ac_charge = 0
                         if pv and out and charge and discharge:
@@ -839,20 +859,26 @@ class AnkerSolixBaseApi:
                                 0,
                                 float(out)
                                 - float(pv)
+                                + float(consumed)
                                 + float(charge)
                                 - float(discharge),
                             )
                         if pv and out and float(pv) > 0:
                             # Solarbank 3 seem to reduce the reported PV energy by consumed energy (Heating, Socket), so it must be added to input
-                            dev_in = float(pv) + float(consumed) + ac_charge
+                            # Input energy = PV + AC charge + loss
+                            dev_in = (
+                                float(pv)
+                                + ac_charge
+                                + max(0, float(consumed) - float(ac_charge))
+                            )
                             device_mqtt["device_efficiency"] = (
                                 f"{min(100, float(out) / dev_in * 100):.3f}"
                             )
                         if charge and discharge and float(charge) > 0:
                             # Charge should include PV charge and AC charge if supported by device
-                            # Solarbank 3 seems to reduce the reported charge energy by consumed energy
+                            # Solarbank 3 seems to reduce the reported charge energy by energy loss
                             device_mqtt["battery_efficiency"] = (
-                                f"{min(100, float(discharge) / (float(charge) + float(consumed)) * 100):.3f}"
+                                f"{min(100, float(discharge) / (float(charge) + max(0, float(consumed) - float(ac_charge))) * 100):.3f}"
                             )
                     device["mqtt_data"] = device_mqtt
                     # trigger device cache update for cap calculation with total or main device soc updates

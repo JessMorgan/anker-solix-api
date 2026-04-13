@@ -467,7 +467,7 @@ class SolixMqttDevice:
         # if value is string make further conversions to get the actual value
         if desc.get(STATE_NAME, "").endswith("_time"):
             # special case for fields indicating (seconds), minutes, hours per byte
-            value = value if isinstance(convert_time(value), bytes) else None
+            value = convert_time(hextime) if isinstance(hextime := convert_time(value), bytes) else None
         # lookup state if value is string
         elif (
             isinstance(value, str)
@@ -658,11 +658,20 @@ class SolixMqttDevice:
                     # Mock state
                     if state_name := desc.get(STATE_NAME):
                         converter = desc.get(STATE_CONVERTER)
-                        state_fields[state_name] = (
+                        state_value = (
                             converter(fieldvalue, None)
                             if callable(converter)
                             else fieldvalue
                         )
+                        # special case to cut mocked time string to length of state string
+                        if (
+                            par.endswith("_time")
+                            and isinstance(state_value, str)
+                            and (length := len(self.mqttdata.get(state_name, ""))) > 0
+                        ):
+                            state_fields[state_name] = state_value[:length]
+                        else:
+                            state_fields[state_name] = state_value
                     # generate generic user description and provided string value or field value
                     user_parms[par] = val if isinstance(val, str) else fieldvalue
                     # mark required parameter as defined
@@ -730,7 +739,6 @@ class SolixMqttDevice:
             ):
                 resp = state_fields
                 # add mock states for fields with depending values
-
                 if toFile:
                     self._filedata.update(resp)
         return resp
