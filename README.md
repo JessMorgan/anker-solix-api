@@ -141,7 +141,7 @@ _LOGGER: logging.Logger = logging.getLogger(__name__)
 CONSOLE: logging.Logger = common.CONSOLE
 
 
-def _out(jsondata):
+def _out(jsondata:str) -> None:
     """Print json string in readable format."""
     CONSOLE.info(json.dumps(jsondata, indent=2))
 
@@ -164,11 +164,11 @@ async def main() -> None:
         _out(myapi.devices)
 
         # Test a defined endpoint from apitypes module
-        #_out(await myapi.apisession.request("post", apitypes.API_ENDPOINTS["bind_devices"],json={}))
+        _out(await myapi.apisession.request("post", apitypes.API_ENDPOINTS["bind_devices"],json={}))
 
         # Test an undefined endpoint directly (available endpoints documented in apitypes module)
-        #mysite = "<your_site_id>"
-        #_out(await myapi.apisession.request("post", "power_service/v1/app/compatible/get_installation",json={"site_id": mysite}))
+        siteId = "<your_site_id>"
+        _out(await myapi.apisession.request("post", "power_service/v1/site/get_scen_info",json={"site_id": siteId}))
 
         # Note: Error response msg from api request may list missing field names or wrong field types from what the endpoint is expecting in the json payload
 
