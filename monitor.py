@@ -4,7 +4,7 @@
 This module will prompt for the Anker account details if not pre-set in the header. Upon successful authentication,
 you will see system and device parameters and values displayed and refreshed at regular interval.
 
-Optionally you can enable MQTT in Live and File mode to mix-in konwn/described binary MQTT message values.
+Optionally you can enable MQTT in Live and File mode to mix-in known/described binary MQTT message values.
 
 Note: When the system owning account is used, more details for the systems and devices can be queried and displayed.
 MQTT messages can only be subscribed for owned devices, which does not work for system member accounts.
@@ -990,9 +990,9 @@ class AnkerSolixApiMonitor:
                     m1 = c and mqtt.get("max_load", "")
                     m3 = c and mqtt.get("max_load_total", "")
                     m2 = c and mqtt.get("ac_input_limit", "")
-                    all = m3 or dev.get("all_power_limit", "")
+                    allpwr = m3 or dev.get("all_power_limit", "")
                     CONSOLE.info(
-                        f"{'Power Limit':<{col1}}: {m1 and c}{m1 or dev.get('power_limit') or '----':>4} {m3 and c}{('(All ' + all + ' ' + unit + ')') if all else '':<{col2 - 5}}{co} "
+                        f"{'Power Limit':<{col1}}: {m1 and c}{m1 or dev.get('power_limit') or '----':>4} {m3 and c}{('(All ' + allpwr + ' ' + unit + ')') if allpwr else '':<{col2 - 5}}{co} "
                         f"{'AC Input Limit':<{col3}}: {m2 and c}{m2 or dev.get('ac_input_limit') or '----':>4} W{co}"
                     )
                     if isinstance(opt := dev.get("power_limit_option"), list):
