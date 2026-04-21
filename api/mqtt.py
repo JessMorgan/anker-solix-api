@@ -19,14 +19,7 @@ import paho.mqtt.client as mqtt
 from paho.mqtt.enums import CallbackAPIVersion
 
 from .apitypes import DeviceHexDataTypes, SolixDefaults
-from .mqttcmdmap import (
-    COMMAND_LIST,
-    COMMAND_NAME,
-    NAME,
-    TYPE,
-    VALUE_FOLLOWS,
-    SolixMqttCommands,
-)
+from .mqttcmdmap import COMMAND_LIST, COMMAND_NAME, NAME, TYPE, SolixMqttCommands
 from .mqttmap import SOLIXMQTTMAP
 from .mqtttypes import (
     DeviceHexData,
@@ -1052,7 +1045,7 @@ def generate_mqtt_command(
                         hexdata.add_timestamp_field(fieldtype=desc.get(TYPE))
                 else:
                     # compose command field based on description
-                    value = parameters.get(desc.get(VALUE_FOLLOWS) or name)
+                    value = parameters.get(name)
                     hexdata.update_field(
                         DeviceHexDataField().update(
                             value=value,

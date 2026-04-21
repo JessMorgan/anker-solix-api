@@ -547,29 +547,14 @@ class AnkerSolixBaseApi:
                                 "photovoltaic_power",
                                 "pv_power_3rd_party",
                                 "pv_power_total",
-                                "dc_input_power",
-                                "dc_input_power_total",
-                                "dc_output_power_total",
-                                "output_power",
-                                "output_power_total",
-                                "output_power_signed_total",
                                 "battery_power_signed",
                                 "battery_power_signed_total",
                                 "bat_charge_power",
                                 "bat_discharge_power",
                                 "battery_to_grid_power",
                                 "battery_to_home_power",
-                                "ac_input_power",
-                                "ac_input_power_total",
-                                "ac_output_power",
-                                "ac_output_power_total",
-                                "ac_output_power_signed",
                                 "device_output_power_signed_total",
                                 "ac_socket_power",
-                                "grid_power_signed",
-                                "grid_power_signed_l1",
-                                "grid_power_signed_l2",
-                                "grid_power_signed_l3",
                                 "heating_power",
                                 "grid_to_battery_power",
                                 "home_demand",
@@ -608,6 +593,20 @@ class AnkerSolixBaseApi:
                                 key.startswith(("device_", "pv_"))
                                 and (key.endswith(("_power", "_power_signed", "_soc")))
                             )
+                            or (
+                                key.startswith(
+                                    (
+                                        "charge_power",
+                                        "grid_power",
+                                        "ac_input_power",
+                                        "ac_output_power",
+                                        "dc_input_power",
+                                        "dc_output_power",
+                                        "output_power",
+                                    )
+                                )
+                                and not key.endswith(("_switch", "_mode"))
+                            )
                         ) and str(value).replace("-", "", 1).replace(
                             ".", "", 1
                         ).isdigit():
@@ -630,6 +629,7 @@ class AnkerSolixBaseApi:
                                 (
                                     "home_demand_circuit_",
                                     "voltage_",
+                                    "charge_voltage_",
                                     "current_",
                                     "system_output_current_",
                                 )
@@ -682,10 +682,12 @@ class AnkerSolixBaseApi:
                                     "dc_12v_auto_on",  # missing MQTT control command
                                     "grid_export_disabled",
                                     "temp_unit_fahrenheit",
-                                    "tcp_port",  # HA missing
-                                    "ip_address",  # HA missing
+                                    "tcp_port",
+                                    "ip_address",
                                     "mode",  # HA missing, HES meaning not clear
                                     "dc_generator_plugged_in",  # HA missing, generator monitoring not fully described
+                                    "car_battery_type",
+                                    "car_battery_voltage_type",
                                 ]
                                 or (
                                     str(key).endswith(

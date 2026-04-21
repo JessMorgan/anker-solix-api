@@ -109,7 +109,7 @@ API_ENDPOINTS: Final[dict] = {
     "scene_info": "power_service/v1/site/get_scen_info",  # Scene info for provided site id (contains most information as the App home screen, with some but not all device details)
     "user_devices": "power_service/v1/site/list_user_devices",  # List Device details of owned devices, not all device details information included
     "charging_devices": "power_service/v1/site/get_charging_device",  # List of Portable Power Station devices?
-    "get_device_parm": "power_service/v1/site/get_site_device_param",  # Get settings of a device for the provided site id and param type (e.g. Schedules), types [1 2 3 4 5 6 7 12 13 16 18 20 23 26]
+    "get_device_parm": "power_service/v1/site/get_site_device_param",  # Get settings of a device for the provided site id and param type (e.g. Schedules), types [1 2 3 4 5 6 7 12 13 16 18 20 23 24 25 26 27 28 29 30 31 32 33]
     "set_device_parm": "power_service/v1/site/set_site_device_param",  # Apply provided settings to a device for the provided site id and param type (e.g. Schedules),
     "energy_analysis": "power_service/v1/site/energy_analysis",  # Fetch energy data for given time frames
     "home_load_chart": "power_service/v1/site/get_home_load_chart",  # Fetch data as displayed in home load chart for schedule adjustments for given site_id and optional device SN (empty if solarbank not connected)
@@ -802,7 +802,7 @@ class SolixParmType(Enum):
     SOLARBANK_POWER_LIMIT = "19"  # cannot be queried, but only set. get_power_limit query will show active data
     # SOLARBANK_EV_CHARGER = "23" # EV Charger switch?
     SOLARBANK_3RD_PARTY_PV = "26"  # third party PV settings for site
-
+    # SOLARBANK_BACKUP = "33" # backup install and ats setting
 
 class SolarbankPowerMode(IntEnum):
     """Int Enumeration for Anker Solix Solarbank 1 Power setting modes."""
@@ -1675,6 +1675,19 @@ class SolixScheduleWeekendMode(StrEnum):
     different = "2"
     unknown = "unknown"
 
+class SolixBatteryType(StrEnum):
+    """Str Enumeration for Battery types."""
+
+    li_fe_po = "0"
+    lead_acid = "1"
+    unknown = "unknown"
+
+class SolixBatteryVoltageType(StrEnum):
+    """Str Enumeration for Battery Voltage types."""
+
+    _12_v = "0"
+    _24_v = "1"
+    unknown = "unknown"
 
 @dataclass
 class SolarbankTimeslot:

@@ -783,6 +783,12 @@ class AnkerSolixApiExport:
                     "20",
                     "23",
                     "26",
+                    "27",
+                    "28",
+                    "29",
+                    "30",
+                    "31",
+                    "33",
                 ]:
                     self._logger.info(
                         "Exporting device parameter type %s settings...", parmtype
