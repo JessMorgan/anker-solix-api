@@ -1809,10 +1809,11 @@ class AnkerSolixApiMonitor:
                         f"{'Port Memory':<{col1}}: {str(m1) and (c or cm)}{get_enum_name(SolixSwitchMode, m1, str(m1) or '---').upper():>3}{'':<{col2 - 3}}{co} "
                         f"{'Energy Saving':<{col3}}: {str(m2) and (c or cm)}{get_enum_name(SolixSwitchMode, m2, str(m2) or '---').upper():>3}{co}"
                     )
-                m1 = (c and mqtt.get("battery_soc", "")) or dev.get("battery_soc", "")
-                m2 = c and mqtt.get("power_cutoff", "")
-                m3 = (c and str(mqtt.get("expansion_packs", ""))) or str(
-                    dev.get("expansion_packs")
+                m1 = cm and (mqtt.get("battery_soc", "") or dev.get("battery_soc", ""))
+                m2 = cm and mqtt.get("power_cutoff", "")
+                m3 = cm and (
+                    str(mqtt.get("expansion_packs", ""))
+                    or str(dev.get("expansion_packs", ""))
                 )
                 m4 = cm and str(mqtt.get("max_soc", ""))
                 if str(m1) or str(m2):
@@ -1824,7 +1825,7 @@ class AnkerSolixApiMonitor:
                     mqtt.get("main_battery_soc", "") or mqtt.get("battery_soc", "")
                 ):
                     soc = f"{m1:>4} %"
-                    m2 = cm and mqtt.get("temperature", "")
+                    m2 = cm and str(mqtt.get("temperature", ""))
                     batstr = "Main B." if "main_battery_soc" in mqtt else "Battery"
                     if m2 and mqtt.get("temp_unit_fahrenheit"):
                         m2 = f"{float(m2) * 9 / 5 + 32:>4} °F"
@@ -1878,7 +1879,9 @@ class AnkerSolixApiMonitor:
                     or dev.get("output_power", "")
                     or dev.get("to_home_load", "")
                 )
-                if m1 or (m2 and devtype != SolixDeviceType.CHARGER.value):
+                if (m1 and devtype == SolixDeviceType.SOLARBANK_PPS.value) or (
+                    m2 and devtype != SolixDeviceType.CHARGER.value
+                ):
                     m3 = cm and mqtt.get("pv_yield", "")
                     m4 = cm and mqtt.get("output_energy", "")
                     CONSOLE.info(
@@ -1929,7 +1932,7 @@ class AnkerSolixApiMonitor:
                     )
                 m1 = cm and mqtt.get("photovoltaic_power", "")
                 m2 = cm and mqtt.get("dc_input_power", "")
-                if m1 or m2:
+                if (m1 and devtype != SolixDeviceType.SOLARBANK_PPS.value) or m2:
                     CONSOLE.info(
                         f"{'Solar Power':<{col1}}: {m1 and (c or cm)}{m1 or '----':>4} {unit:<{col2 - 5}}{co} "
                         f"{'DC Input Power':<{col3}}: {m2 and (c or cm)}{m2 or '----':>4} {unit}{co}"
@@ -2120,7 +2123,7 @@ class AnkerSolixApiMonitor:
                 m3 = cm and mqtt.get("device_switch", "")
                 m2 = cm and mqtt.get("output_power_limit_min", "")
                 m4 = cm and mqtt.get("output_power_limit_max", "")
-                if m1 or str(m3) or m2:
+                if (m1 and devtype == SolixDeviceType.CHARGER.value) or str(m3) or m2:
                     if m1 and mqtt.get("temp_unit_fahrenheit"):
                         m1 = f"{float(m1) * 9 / 5 + 32:>4} °F"
                     else:

@@ -132,6 +132,43 @@ _PPS_VERSIONS_0830 = {
     },
 }
 
+_A1722_0405 = {
+    # C300 AC param info
+    TOPIC: "param_info",
+    "a4": {NAME: "remaining_time_hours", FACTOR: 0.1, SIGNED: False},
+    "a7": {NAME: "usbc_1_power"},  # USB-C port 1 output power
+    "a8": {NAME: "usbc_2_power"},  # USB-C port 2 output power
+    "a9": {NAME: "usbc_3_power"},  # USB-C port 3 output power
+    "aa": {NAME: "usba_1_power"},  # USB-A port 1 output power
+    "ac": {NAME: "dc_input_power_total"},  # DC input power (solar/car charging)
+    "ad": {NAME: "ac_input_power_total"},  # Total AC Input in W (int)
+    "ae": {NAME: "ac_output_power_total"},  # Total AC Output in W (int)
+    "b7": {
+        NAME: "ac_output_power_switch"
+    },  # AC output switch: Disabled (0) or Enabled (1)
+    "b8": {NAME: "dc_charging_status"},  # None (0), Charging (1)
+    "b9": {NAME: "temperature", SIGNED: True},  # In Celsius
+    "ba": {NAME: "charging_status"},  # None (0), Discharging (1), Charging (2) ???
+    "bb": {NAME: "battery_soc"},  # Battery SOC
+    "bc": {NAME: "battery_soh"},  # Battery Health
+    "c1": {
+        NAME: "dc_output_power_switch"
+    },  # DC output switch: Disabled (0) or Enabled (1)
+    "c5": {NAME: "device_sn"},  # Device serial number
+    "c6": {NAME: "ac_input_limit"},  # Recharge limit
+    "cf": {
+        NAME: "display_mode"
+    },  # Display brightness: Off (0), Low (1), Medium (2), High (3)
+    "fe": {NAME: "msg_timestamp"},  # Message timestamp
+}
+
+_A1725_0401 = {
+    # C200 DC param info (A1725/A1727) - settings
+    TOPIC: "param_info",
+    "a1": {NAME: "device_pn"},  # Device PN identifier
+    "a4": {NAME: "display_switch"},  # Off (0) or On (1)
+}
+
 _A1725_0405 = {
     # C200 DC param info (A1725/A1727)
     TOPIC: "param_info",
@@ -164,43 +201,6 @@ _A1725_0405 = {
     "c9": {NAME: "temp_unit_fahrenheit"},  # Temperature unit: Celsius (0), Fahrenheit (1)
     "ca": {NAME: "display_switch"},  # Off (0) or On (1)
     "cd": {NAME: "charging_status"},  # Inactive (0), Solar (1)
-    "fe": {NAME: "msg_timestamp"},  # Message timestamp
-}
-
-_A1725_0401 = {
-    # C200 DC param info (A1725/A1727) - settings
-    TOPIC: "param_info",
-    "a1": {NAME: "device_pn"},  # Device PN identifier
-    "a4": {NAME: "display_switch"},  # Off (0) or On (1)
-}
-
-_A1722_0405 = {
-    # C300 AC param info
-    TOPIC: "param_info",
-    "a4": {NAME: "remaining_time_hours", FACTOR: 0.1, SIGNED: False},
-    "a7": {NAME: "usbc_1_power"},  # USB-C port 1 output power
-    "a8": {NAME: "usbc_2_power"},  # USB-C port 2 output power
-    "a9": {NAME: "usbc_3_power"},  # USB-C port 3 output power
-    "aa": {NAME: "usba_1_power"},  # USB-A port 1 output power
-    "ac": {NAME: "dc_input_power_total"},  # DC input power (solar/car charging)
-    "ad": {NAME: "ac_input_power_total"},  # Total AC Input in W (int)
-    "ae": {NAME: "ac_output_power_total"},  # Total AC Output in W (int)
-    "b7": {
-        NAME: "ac_output_power_switch"
-    },  # AC output switch: Disabled (0) or Enabled (1)
-    "b8": {NAME: "dc_charging_status"},  # None (0), Charging (1)
-    "b9": {NAME: "temperature", SIGNED: True},  # In Celsius
-    "ba": {NAME: "charging_status"},  # None (0), Discharging (1), Charging (2) ???
-    "bb": {NAME: "battery_soc"},  # Battery SOC
-    "bc": {NAME: "battery_soh"},  # Battery Health
-    "c1": {
-        NAME: "dc_output_power_switch"
-    },  # DC output switch: Disabled (0) or Enabled (1)
-    "c5": {NAME: "device_sn"},  # Device serial number
-    "c6": {NAME: "ac_input_limit"},  # Recharge limit
-    "cf": {
-        NAME: "display_mode"
-    },  # Display brightness: Off (0), Low (1), Medium (2), High (3)
     "fe": {NAME: "msg_timestamp"},  # Message timestamp
 }
 
@@ -3872,25 +3872,6 @@ _PP_JSON = {
 
 # Following is the consolidated mapping for all device types and messages
 SOLIXMQTTMAP: Final[dict] = {
-    # PPS C200 (A1725/A1727)
-    "A1725": {
-        "0045": CMD_DEVICE_TIMEOUT_MIN,  # Device timeout: 0 (Never), 30, 60, 120, 240, 360, 720, 1440 minutes
-        "0046": CMD_DISPLAY_TIMEOUT_SEC,  # Options in seconds: 20, 30, 60, 300, 1800 seconds
-        "004c": CMD_DISPLAY_MODE,  # Display brightness: Low (1), Medium (2), High (3)
-        "0052": CMD_DISPLAY_SWITCH,  # Display switch: Disabled (0) or Enabled (1)
-        "0057": CMD_REALTIME_TRIGGER,  # for regular status messages 0405 etc
-        "0401": _A1725_0401,  # Interval: Irregular, triggered on app/device actions
-        "0405": _A1725_0405,  # Interval: ~3-5 seconds, but only with realtime trigger
-    },
-    "A1727": {
-        "0045": CMD_DEVICE_TIMEOUT_MIN,  # Device timeout: 0 (Never), 30, 60, 120, 240, 360, 720, 1440 minutes
-        "0046": CMD_DISPLAY_TIMEOUT_SEC,  # Options in seconds: 20, 30, 60, 300, 1800 seconds
-        "004c": CMD_DISPLAY_MODE,  # Display brightness: Low (1), Medium (2), High (3)
-        "0052": CMD_DISPLAY_SWITCH,  # Display switch: Disabled (0) or Enabled (1)
-        "0057": CMD_REALTIME_TRIGGER,  # for regular status messages 0405 etc
-        "0401": _A1725_0401,  # Interval: Irregular, triggered on app/device actions
-        "0405": _A1725_0405,  # Interval: ~3-5 seconds, but only with realtime trigger
-    },
     # PPS C300 AC
     "A1722": {
         "0044": CMD_AC_CHARGE_LIMIT  # AC Recharge Limit: 100, 200, 300, 330 W
@@ -3941,6 +3922,16 @@ SOLIXMQTTMAP: Final[dict] = {
         # Interval: Irregular, triggered on app actions, no fixed interval
         "0830": _PPS_VERSIONS_0830,
     },
+    # SOLIX C200(X) A1725
+    "A1725": {
+        "0045": CMD_DEVICE_TIMEOUT_MIN,  # Device timeout: 0 (Never), 30, 60, 120, 240, 360, 720, 1440 minutes
+        "0046": CMD_DISPLAY_TIMEOUT_SEC,  # Options in seconds: 20, 30, 60, 300, 1800 seconds
+        "004c": CMD_DISPLAY_MODE,  # Display brightness: Low (1), Medium (2), High (3)
+        "0052": CMD_DISPLAY_SWITCH,  # Display switch: Disabled (0) or Enabled (1)
+        "0057": CMD_REALTIME_TRIGGER,  # for regular status messages 0405 etc
+        "0401": _A1725_0401,  # Interval: Irregular, triggered on app/device actions
+        "0405": _A1725_0405,  # Interval: ~3-5 seconds, but only with realtime trigger
+    },
     # PPS C300 DC
     "A1726": {
         "0043": CMD_DC_OUTPUT_TIMEOUT_SEC  # DC output timeout: Custom Range 0-86100 seconds
@@ -3964,6 +3955,16 @@ SOLIXMQTTMAP: Final[dict] = {
         "0404": _A1728_0404,  # Interval: Irregular, triggered on app action, no fixed interval
         "0405": _A1728_0405,  # Interval: ~3-5 seconds, but only with realtime trigger
         "0830": _PPS_VERSIONS_0830,  # Interval: Irregular, triggered on app actions, no fixed interval
+    },
+    # SOLIX C200 DC A1727
+    "A1727": {
+        "0045": CMD_DEVICE_TIMEOUT_MIN,  # Device timeout: 0 (Never), 30, 60, 120, 240, 360, 720, 1440 minutes
+        "0046": CMD_DISPLAY_TIMEOUT_SEC,  # Options in seconds: 20, 30, 60, 300, 1800 seconds
+        "004c": CMD_DISPLAY_MODE,  # Display brightness: Low (1), Medium (2), High (3)
+        "0052": CMD_DISPLAY_SWITCH,  # Display switch: Disabled (0) or Enabled (1)
+        "0057": CMD_REALTIME_TRIGGER,  # for regular status messages 0405 etc
+        "0401": _A1725_0401,  # Interval: Irregular, triggered on app/device actions
+        "0405": _A1725_0405,  # Interval: ~3-5 seconds, but only with realtime trigger
     },
     # PPS C300X DC
     "A1728": {
@@ -4828,6 +4829,20 @@ SOLIXMQTTMAP: Final[dict] = {
         # Interval: ~300 seconds
         "0500": _DOCK_0500,
     },
+
+    # Power Cooler Everfrost 2 40L
+    "A17A4": {
+        # Interval: Irregular, triggered on app actions, no fixed interval
+        "0830": _PPS_VERSIONS_0830,
+        "0889": {
+            "a2": {NAME: "setting_0889_a2"},
+            "a3": {NAME: "setting_0889_a3"},
+            "a4": {NAME: "setting_0889_a4"},
+            "a5": {NAME: "setting_0889_a5"},
+            "a6": {NAME: "setting_0889_a6"},
+        },
+    },
+
     # Prime Charger 250W
     "A2345": {
         "0200": CMD_STATUS_REQUEST,  # Device status request for message 0a00
