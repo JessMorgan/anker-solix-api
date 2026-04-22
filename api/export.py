@@ -45,7 +45,7 @@ from .mqttmap import SOLIXMQTTMAP
 from .mqtttypes import DeviceHexData
 
 _LOGGER: logging.Logger = logging.getLogger(__name__)
-VERSION: str = "3.6.0.0"
+VERSION: str = "3.6.1.0"
 
 
 class AnkerSolixApiExport:
@@ -689,6 +689,16 @@ class AnkerSolixApiExport:
                 payload={
                     "token": ((response or {}).get("data") or {}).get("token", "")
                 },
+            )
+            self._logger.info("Exporting extender system OTA info...")
+            await self.query(
+                endpoint=API_ENDPOINTS["get_extender_system_pn_ota"],
+                filename=f"{API_FILEPREFIXES['get_extender_system_pn_ota']}.json",
+            )
+            self._logger.info("Exporting extender system list...")
+            await self.query(
+                endpoint=API_ENDPOINTS["get_extender_system_list"],
+                filename=f"{API_FILEPREFIXES['get_extender_system_list']}.json",
             )
 
             # loop through all found sites
