@@ -1719,6 +1719,7 @@ class Solarbank2Timeslot:
     start_time: datetime | None
     end_time: datetime | None
     appliance_load: int | None = None  # mapped to appliance_load setting
+    charging_type: int | None = None  # mapped to charging_type setting, was introduced April 2026
     weekdays: set[int | str] | None = (
         None  # set of weekday numbers or abbreviations where this slot applies, defaulting to all if None. sun = 0, sat = 6
     )

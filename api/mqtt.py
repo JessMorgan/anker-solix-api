@@ -506,7 +506,7 @@ class AnkerSolixMqttSession:
             )
             # Set userdata for client
             self.client.user_data_set(self.subscriptions)
-            # self.client.connect_timeout = 10
+            self.client.connect_timeout = 15
             # Set callbacks for client
             self.client.on_connect = self.on_connect
             self.client.on_message = self.on_message
