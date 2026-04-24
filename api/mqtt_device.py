@@ -354,11 +354,19 @@ class SolixMqttDevice:
                 start = desc.get(VALUE_MIN, 0)
                 stop = desc.get(VALUE_MAX, 0)
                 step = desc.get(VALUE_STEP, 1)
+                factor = round(1 / step) if step < 1 else 1
                 if (
                     start < stop
-                    and len(rng := range(start, stop + step, step)) <= limit
+                    and len(
+                        rng := range(
+                            round(start * factor),
+                            round((stop + step) * factor),
+                            round(step * factor),
+                        )
+                    )
+                    <= limit
                 ):
-                    options = rng
+                    options = [round_by_factor(v / factor, step) for v in rng] if factor > 1 else rng
             if isinstance(options, dict):
                 return options
             if isinstance(options, list | range):
