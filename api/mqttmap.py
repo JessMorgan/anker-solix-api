@@ -297,6 +297,8 @@ _A1729_0405 = _A1725_0405 | {
     # A1729 matches the C200 DC telemetry layout, but cd is only the solar input
     # status. Keep b6 as the overall charging_status because C3 charging reports
     # b6=2 while cd remains 0.
+    "af": {NAME: "battery_soc_ah", FACTOR: 0.001},  # Battery SOC (Ah)
+    "b8": {NAME: "battery_soh"},  # Battery health
     "cd": {NAME: "solar_input_status"},  # Inactive (0), Solar (1)
 }
 
