@@ -1957,9 +1957,10 @@ class AnkerSolixApi(AnkerSolixBaseApi):
                     dict,
                 ):
                     return False
-            # For file testing, allow modification in the power limit file to sync Api mock data with required MQTT command
-            elif not toFile:
-                return False
+            # Use device attribute setting which may not have any affect
+            # Allow modification in the power limit file to sync Api mock data with required MQTT command
+            else:
+                data["power_limit"] = ac_output
         # update device attributes as required
         if data:
             if not isinstance(
