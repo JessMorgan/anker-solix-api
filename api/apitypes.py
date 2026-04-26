@@ -1227,6 +1227,10 @@ class SolarbankDeviceMetrics:
         "pv_power_limit",
         "ac_input_limit",
         "power_limit_option",
+        "charge_upper_limit",
+        "discharge_lower_limit",
+        "backup_reserve",
+        "backup_reserve_switch",
     }
     # SOLIX Solarbank PPS F3000, with 2 MPPT channels
     A1782: ClassVar[set[str]] = {
@@ -1238,6 +1242,13 @@ class SolarbankDeviceMetrics:
         "power_limit",
         "pv_power_limit",
         "ac_input_limit",
+    }
+    # SOLIX Solarbank Power Dock centralized controls
+    AE100: ClassVar[set[str]] = {
+        "charge_upper_limit",
+        "discharge_lower_limit",
+        "backup_reserve",
+        "backup_reserve_switch",
     }
     # Inverter Output Settings
     INVERTER_OUTPUT_OPTIONS: ClassVar[dict[str, Any]] = {

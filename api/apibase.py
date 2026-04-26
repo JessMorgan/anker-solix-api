@@ -512,12 +512,12 @@ class AnkerSolixBaseApi:
                                     "power_panel_sn",  # not used in monitor or HA
                                     "toggle_to_delay_time",  # HA missing, MQTT control not fully described
                                     "toggle_to_elapsed_time",  # HA missins, MQTT control not fully described
-                                    "light_off_start_time",  # HA missing
-                                    "light_off_end_time",  # HA missing
-                                    "week_start_time",  # HA missing
-                                    "week_end_time",  # HA missing
-                                    "weekend_start_time",  # HA missing
-                                    "weekend_end_time",  # HA missing
+                                    "light_off_start_time",
+                                    "light_off_end_time",
+                                    "week_start_time",
+                                    "week_end_time",
+                                    "weekend_start_time",
+                                    "weekend_end_time",
                                     "load_balance_monitor_device",  # not used in HA
                                     "solar_evcharge_monitor_device",  # not used in HA
                                     "load_balance_setting_d5",  # Unknown control parameter state value
@@ -543,6 +543,7 @@ class AnkerSolixBaseApi:
                                 "battery_soc_total",
                                 "main_battery_soc",
                                 "max_soc",
+                                "backup_soc",
                                 "temperature",
                                 "photovoltaic_power",
                                 "pv_power_3rd_party",
@@ -557,11 +558,9 @@ class AnkerSolixBaseApi:
                                 "ac_socket_power",
                                 "heating_power",
                                 "grid_to_battery_power",
-                                "home_demand",
-                                "home_demand_total",
-                                "generator_to_battery_power",  # HA missing
-                                "generator_to_home_power",  # HA missing
-                                "generator_power",  # HA missing
+                                "generator_to_battery_power",
+                                "generator_to_home_power",
+                                "generator_power",
                                 "charge_priority_limit",
                                 "pv_limit",
                                 "ac_input_limit",
@@ -603,6 +602,7 @@ class AnkerSolixBaseApi:
                                         "dc_input_power",
                                         "dc_output_power",
                                         "output_power",
+                                        "home_demand",
                                     )
                                 )
                                 and not key.endswith(("_switch", "_mode"))
@@ -627,7 +627,6 @@ class AnkerSolixBaseApi:
                             ]
                             or str(key).startswith(
                                 (
-                                    "home_demand_circuit_",
                                     "voltage_",
                                     "charge_voltage_",
                                     "current_",
@@ -685,7 +684,7 @@ class AnkerSolixBaseApi:
                                     "tcp_port",
                                     "ip_address",
                                     "mode",  # HA missing, HES meaning not clear
-                                    "dc_generator_plugged_in",  # HA missing, generator monitoring not fully described
+                                    "generator_plug_status",
                                     "car_battery_type",
                                     "car_battery_voltage_type",
                                 ]

@@ -794,11 +794,12 @@ class AnkerSolixApiMonitor:
                 # print station details
                 m1 = c and mqtt.get("ac_output_power_signed", "")
                 m2 = c and mqtt.get("ac_input_limit_total", "")
-                CONSOLE.info(
-                    f"{'AC Output Power':<{col1}}:{m1 and c}{m1 or dev.get('current_power') or '----':>5} {unit:<{col2 - 5}}{co} "
-                    f"{'All AC In Limit':<{col3}}:{m2 and c}{m2 or dev.get('all_ac_input_limit') or '----':>5} W"
-                )
-                m1 = c and mqtt.get("max_load_total", "")
+                if m1 or m2:
+                    CONSOLE.info(
+                        f"{'AC Output Power':<{col1}}:{m1 and c}{m1 or dev.get('current_power') or '----':>5} {unit:<{col2 - 5}}{co} "
+                        f"{'All AC In Limit':<{col3}}:{m2 and c}{m2 or dev.get('all_ac_input_limit') or '----':>5} W"
+                    )
+                m1 = c and str(mqtt.get("max_load_total", ""))
                 if isinstance(opt := dev.get("all_power_limit_option"), list):
                     opt = [
                         item
@@ -807,17 +808,33 @@ class AnkerSolixApiMonitor:
                         for key, item in d.items()
                         if key == "limit"
                     ]
-                m3 = c and mqtt.get("max_load_limit_total", "")
-                CONSOLE.info(
-                    f"{'All Pwr Limit':<{col1}}:{m1 and c}{m1 or dev.get('all_power_limit', '----'):>5} {unit}{' (' + m3 + ' W)' if m3 else '':<{col2 - 6}}{co} "
-                    f"{'Pwr Limit Opt':<{col3}}: {opt or '----'!s}"
-                )
+                m3 = c and str(mqtt.get("max_load_limit_total", ""))
+                if m1 or opt or m3:
+                    CONSOLE.info(
+                        f"{'All Pwr Limit':<{col1}}:{m1 and c}{m1 or dev.get('all_power_limit', '----'):>5} {unit}{' (' + m3 + ' W)' if m3 else '':<{col2 - 6}}{co} "
+                        f"{'Pwr Limit Opt':<{col3}}: {opt or '----'!s}"
+                    )
                 feat1 = dev.get("allow_grid_export")
                 feat2 = dev.get("grid_export_limit") or "----"
-                CONSOLE.info(
-                    f"{'Min SoC':<{col1}}: {(dev.get('power_cutoff') or dev.get('output_cutoff_data') or '--')!s:>4} {'%':<{col2 - 5}} "
-                    f"{'Grid export':<{col3}}: {'ON' if feat1 else '---' if feat1 is None else 'OFF':>4} (Limit {feat2} W)"
+                m1 = (
+                    (
+                        c
+                        and (
+                            mqtt.get("output_cutoff_data", "")
+                            or mqtt.get("power_cutoff", "")
+                        )
+                    )
+                    or dev.get("power_cutoff")
+                    or dev.get("output_cutoff_data")
                 )
+                if m3 := c and str(mqtt.get("backup_soc", "")):
+                    m3 = int(m3)
+                if m1 or str(m3):
+                    CONSOLE.info(
+                        f"{'Min/Backup SoC':<{col1}}: {m1 and (c or cm)}{(m1 or '--')!s:>4}{co} % / "
+                        f"{m3 and (c or cm)}{(str(m3) or dev.get("backup_reserve") or '--')!s:>3} {'%':<{col2 - 13}}{co} "
+                        f"{'Grid export':<{col3}}: {'ON' if feat1 else '---' if feat1 is None else 'OFF':>4} (Limit {feat2} W)"
+                    )
                 unit = "W"
                 if m1 := cm and mqtt.get("battery_soc_total", ""):
                     CONSOLE.info(
@@ -838,6 +855,13 @@ class AnkerSolixApiMonitor:
                     CONSOLE.info(
                         f"{'PV Tot / Extern':<{col1}}:{m1 and (c or cm)}{m1 or '----':>5} {unit} /{m3 or '----':>5} {unit:<{col2 - 14}}{co} "
                         f"{'Bat Power Total':<{col3}}:{m2 and (c or cm)}{m2 or '----':>5} {unit}{co}"
+                    )
+                m1 = cm and mqtt.get("generator_power", "")
+                m2 = cm and mqtt.get("generator_plug_status", "")
+                if m1 or str(m2):
+                    CONSOLE.info(
+                        f"{'Generator Power':<{col1}}:{m1 and (c or cm)}{m1 or '----':>5} {unit:<{col2 - 5}}{co} "
+                        f"{'Generator Plug':<{col3}}:{str(m2) and (c or cm)} {('Connected' if m2 == 1 else 'Disconnected' if m2 == 0 else 'Unknown')} ({'-' if m2 is None else str(m2)}){co}"
                     )
                 for i in range(1, 7):
                     if m1 := cm and mqtt.get(f"device_{i}_sn", ""):
@@ -881,21 +905,22 @@ class AnkerSolixApiMonitor:
                         )
                     else:
                         break
-                CONSOLE.info("." * 80)
                 if aiems := (dev.get("schedule") or {}).get("ai_ems") or {}:
                     status = aiems.get("status")
                     CONSOLE.info(
                         f"{'AI Status':<{col1}}: {str(get_enum_name(SolarbankAiemsStatus, status, '-----')).capitalize() + ' (' + str(status) + ')':<{col2}} "
                         f"{'AI Enabled':<{col3}}: {'YES' if aiems.get('enable') else 'NO'}"
                     )
-                site_preset = dev.get("set_system_output_power") or "---"
-                CONSOLE.info(
-                    f"{'Schedule  (Now)':<{col1}}: {datetime.now().astimezone().strftime('%H:%M:%S UTC %z'):<{col2}} "
-                    f"{'System Preset':<{col3}}: {str(site_preset).replace('W', ''):>4} W"
-                )
-                if admin:
-                    # print schedule
-                    common.print_schedule(dev.get("schedule") or {})
+                site_preset = dev.get("set_system_output_power","")
+                if "schedule" in dev or site_preset:
+                    CONSOLE.info("." * 80)
+                    CONSOLE.info(
+                        f"{'Schedule  (Now)':<{col1}}: {datetime.now().astimezone().strftime('%H:%M:%S UTC %z'):<{col2}} "
+                        f"{'System Preset':<{col3}}: {str(site_preset).replace('W', '') or "---":>4} W"
+                    )
+                    if admin:
+                        # print schedule
+                        common.print_schedule(dev.get("schedule") or {})
 
             elif devtype in [
                 SolixDeviceType.SOLARBANK.value,
@@ -918,10 +943,13 @@ class AnkerSolixApiMonitor:
                 if m3 := cm and mqtt.get("battery_soh", ""):
                     m3 = f"{float(m3):6.2f}"
                 soc = f"{m1 or dev.get('battery_soc', '---'):>4} %"
-                if dev.get("generation", 0) > 1:
+                if dev.get("generation", 0) > 1 or devtype == SolixDeviceType.HOME_BACKUP.value:
+                    if m4 := c and mqtt.get("backup_soc", ""):
+                        m4 = int(m4)
                     CONSOLE.info(
                         f"{'Battery SoC/SoH':<{col1}}: {m1 and c}{soc} /{m3 and (c or cm)}{m3 or ' --.--':>4} {'%':<{col2 - 15}}{co} "
-                        f"{'Min SoC':<{col3}}: {m2 and c}{m2 or (dev.get('power_cutoff') or dev.get('output_cutoff_data') or '--')!s:>4} %{co}"
+                        f"{'Min/Backup SoC':<{col3}}: {m2 and c}{m2 or (dev.get('power_cutoff') or dev.get('output_cutoff_data') or '--')!s:>4} %{co} / "
+                        f"{m4 and (c or cm)}{str(m4) or dev.get("backup_reserve") or '--'} %{co}"
                     )
                 else:
                     m4 = cm and mqtt.get("temperature", "")
@@ -1392,10 +1420,10 @@ class AnkerSolixApiMonitor:
                         f"{'Bat -> Grid Pwr':<{col3}}: {m2 and (c or cm)}{m2 or '-':>5} {unit}{co}"
                     )
                 if m1 := cm and mqtt.get("generator_power", ""):
-                    m2 = cm and mqtt.get("", "")
+                    m2 = cm and mqtt.get("generator_plug_status", "")
                     CONSOLE.info(
-                        f"{'Generator Power':<{col1}}: {m1 and (c or cm)}{m1:>5} {unit:<{col2 - 6}}{co} "
-                        # f"{'':<{col3}}: {m2 and (c or cm)}{m2:>5} {unit}{co}"
+                        f"{'Generator Power':<{col1}}:{m1 and (c or cm)}{m1 or '----':>5} {unit:<{col2 - 6}}{co} "
+                        f"{'Generator Plug':<{col3}}:{str(m2) and (c or cm)} {('Connected' if m2 == 1 else 'Disconnected' if m2 == 0 else 'Unknown')} ({'-' if m2 is None else str(m2)}){co}"
                     )
                 if m1 := cm and mqtt.get("generator_to_home_power", ""):
                     m2 = cm and mqtt.get("generator_to_battery_power", "")
