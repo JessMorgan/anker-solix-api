@@ -3074,6 +3074,7 @@ class AnkerSolixApiMonitor:
                             and self.device_filter is None
                             and len(self.device_names) > 2
                         ):
+                            self.pause_output = True
                             CONSOLE.info(
                                 "Select which device should be filtered in output:"
                             )
@@ -3094,6 +3095,7 @@ class AnkerSolixApiMonitor:
                                 ].split(",", maxsplit=1)[0]
                             else:
                                 self.device_filter = ""
+                            self.pause_output = False
 
                     if self.showMqttDevice:
                         self.print_device_mqtt(deviceSn=None)
@@ -3212,7 +3214,7 @@ class AnkerSolixApiMonitor:
                                             self.folderdict["folder"] = (
                                                 self.api.testDir()
                                             )
-                                            self.device_filter = ""
+                                            self.device_filter = None
                                             self.device_names = []
                                             self.mqtt_devices = {}
                                             self.next_dev_refr = 0
@@ -3496,34 +3498,33 @@ class AnkerSolixApiMonitor:
                                         break
                                     elif k == "f":
                                         # toggle the filtered device sn
-                                        if self.device_names:
-                                            if not self.device_filter:
-                                                self.device_filter = "All"
-                                            sns = [
-                                                d.split(",", maxsplit=1)[0]
-                                                for d in self.device_names
-                                            ]
-                                            index = (
-                                                sns.index(self.device_filter)
-                                                if self.device_filter in sns
-                                                else -1
-                                            )
-                                            self.device_filter = self.device_names[
-                                                index + 1
-                                                if index + 1 < len(self.device_names)
-                                                else 0
-                                            ]
+                                        if len(self.device_names) > 2:
+                                            self.pause_output = True
                                             CONSOLE.info(
-                                                f"\n{Color.MAG}Toggling device filter to {self.device_filter}...{Color.OFF}"
+                                                "Select which device should be filtered in output:"
                                             )
-                                            self.device_filter = str(
-                                                self.device_filter
-                                            ).split(",", maxsplit=1)[0]
-                                            # isolate SN in filter
-                                            if self.device_filter == "All":
+                                            for idx, devicename in enumerate(self.device_names):
+                                                CONSOLE.info(
+                                                    f"({Color.YELLOW}{idx}{Color.OFF}) {devicename}"
+                                                )
+                                            selection = await self.async_inupt(
+                                                f"Enter device number ({Color.YELLOW}0-{len(self.device_names) - 1}{Color.OFF}) or nothing for {Color.CYAN}All{Color.OFF}: ",
+                                            )
+                                            if (
+                                                selection
+                                                and selection.isdigit()
+                                                and 1 <= int(selection) < len(self.device_names)
+                                            ):
+                                                self.device_filter = self.device_names[
+                                                    int(selection)
+                                                ].split(",", maxsplit=1)[0]
+                                            else:
                                                 self.device_filter = ""
-                                            await asyncio.sleep(2)
+                                            self.pause_output = False
                                             break
+                                        CONSOLE.info(
+                                            f"\n{Color.RED}Only single device available...{Color.OFF}"
+                                        )
                                     elif k == "v":
                                         # print all extracted MQTT values (MQTT session cache) and device data
                                         if self.api.mqttsession:

@@ -163,7 +163,7 @@ _A1722_0405 = {
 }
 
 _A1725_0401 = {
-    # C200 DC param info (A1725/A1727) - settings
+    # C200 DC param info (A1725/A1727/A1729) - settings
     TOPIC: "param_info",
     "a1": {NAME: "device_pn"},  # Device PN identifier
     "a4": {NAME: "display_switch"},  # Off (0) or On (1)
@@ -182,9 +182,11 @@ _A1725_0405 = {
     "ab": {NAME: "photovoltaic_power"},  # Solar input power (W)
     "ac": {NAME: "dc_input_power_total"},  # Total input power (solar + C3 input when charging)
     "ad": {NAME: "dc_output_power_total"},  # Total USB output power
+    "af": {NAME: "battery_soc_ah", FACTOR: 0.001},  # Battery SOC (Ah)
     "b5": {NAME: "temperature", SIGNED: True},  # In Celsius
     "b6": {NAME: "charging_status"},  # Power state: 0=idle, 1=discharge, 2=charge
     "b7": {NAME: "battery_soc"},  # Battery state of charge (%)
+    "b8": {NAME: "battery_soh"},  # Battery health
     "b9": {NAME: "usbc_1_status"},  # USB-C1 top status: Inactive (0), Discharging (1)
     "ba": {NAME: "usbc_2_status"},  # USB-C2 middle status: Inactive (0), Discharging (1)
     "bb": {NAME: "usbc_3_status"},  # USB-C3 bottom status: Inactive (0), Discharging (1), Charging (2)
@@ -297,8 +299,6 @@ _A1729_0405 = _A1725_0405 | {
     # A1729 matches the C200 DC telemetry layout, but cd is only the solar input
     # status. Keep b6 as the overall charging_status because C3 charging reports
     # b6=2 while cd remains 0.
-    "af": {NAME: "battery_soc_ah", FACTOR: 0.001},  # Battery SOC (Ah)
-    "b8": {NAME: "battery_soh"},  # Battery health
     "cd": {NAME: "solar_input_status"},  # Inactive (0), Solar (1)
 }
 
