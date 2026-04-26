@@ -2245,9 +2245,9 @@ _AX170_0405 = {
         NAME: "battery_power_signed_total"
     },  # Power draw from battery. Negative is charging, positive is discharging.
     "b5": {
-        NAME: "backup_soc_limit"
+        NAME: "backup_soc"
     },  # Minimum Self Consumption reserve %, Not overall reserve. Battery will stay above this level, unless grid fault.
-    "b7": {NAME: "max_soc_limit?"},  # Maybe battery health??
+    "b7": {NAME: "max_soc?"},  # Maybe battery health??
     "b9": {
         NAME: "main_breaker_limit?"
     },  # It's 200 on tests, so its a good chance its the 200AMP?
@@ -2271,9 +2271,9 @@ _AX170_0405 = {
         }
     },
     "cd": {NAME: "home_demand_total"},
-    "ce": {NAME: "dc_generator_plugged_in"},
+    "ce": {NAME: "generator_plug_status"},
     "d4": {NAME: "pv_power_3rd_party"},  # Power from external solar to home?
-    "d6": {NAME: "dc_generator_power"},  # Power from external DC generator
+    "d6": {NAME: "generator_power"},  # Power from external DC generator
     "dd": {NAME: "display_timeout_seconds"},
     "de": {
         NAME: "max_load_limit_total?"

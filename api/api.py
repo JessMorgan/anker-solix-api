@@ -288,6 +288,9 @@ class AnkerSolixApi(AnkerSolixBaseApi):
                             "time_zone",
                             "grid_export_limit",
                             "owner_user_id",
+                            "charge_upper_limit",
+                            "discharge_lower_limit",
+                            "backup_reserve",
                         ]
                         and value
                     ):
@@ -351,6 +354,9 @@ class AnkerSolixApi(AnkerSolixBaseApi):
                             "micro_inverter_low_power_limit",
                             "grid_to_battery_power",
                             "pei_heating_power",
+                            "charge_upper_limit",
+                            "discharge_lower_limit",
+                            "backup_reserve",
                         ]
                         and value
                     ):
@@ -372,6 +378,12 @@ class AnkerSolixApi(AnkerSolixBaseApi):
                             SolarbankDeviceMetrics, device.get("device_pn") or "", {}
                         ):
                             device[key] = int(value)
+                    elif (
+                        # Add solarbank int metrics depending on device type or generation
+                        key =="backup_reserve_switch"and key in getattr(
+                            SolarbankDeviceMetrics, device.get("device_pn") or "", {}
+                        )):
+                            device[key] = bool(value)
                     elif key == "sub_package_num" and str(value).isdigit():
                         if key in getattr(
                             SolarbankDeviceMetrics, device.get("device_pn") or "", {}
@@ -1792,6 +1804,16 @@ class AnkerSolixApi(AnkerSolixBaseApi):
                 )
                 station["grid_export_limit"] = str(
                     station_param.get("feed-in_power_limit", "")
+                )
+                station["charge_upper_limit"] = str(
+                    station_param.get("charge_upper_limit", "")
+                )
+                station["discharge_lower_limit"] = str(
+                    station_param.get("discharge_lower_limit", "")
+                )
+                station["backup_reserve"] = str(station_param.get("backup_reserve", ""))
+                station["backup_reserve_switch"] = bool(
+                    station_param.get("backup_reserve_switch")
                 )
                 # add station_sn to site as reference
                 self._update_site(siteId, {"station_sn": station_sn})

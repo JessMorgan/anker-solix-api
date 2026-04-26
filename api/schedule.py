@@ -336,6 +336,16 @@ async def get_device_parm(
                         "grid_export_limit": str(
                             paramData.get("feed-in_power_limit", "")
                         ),
+                        "charge_upper_limit": str(
+                            paramData.get("charge_upper_limit", "")
+                        ),
+                        "discharge_lower_limit": str(
+                            paramData.get("discharge_lower_limit", "")
+                        ),
+                        "backup_reserve": str(paramData.get("backup_reserve", "")),
+                        "backup_reserve_switch": bool(
+                            paramData.get("backup_reserve_switch", "")
+                        ),
                     }
                 )
             # update physical station device if in use (this cannot be done by power_limit query in site details poller if update triggered by param change)
@@ -355,6 +365,16 @@ async def get_device_parm(
                 )
                 station["grid_export_limit"] = str(
                     paramData.get("feed-in_power_limit", "")
+                )
+                station["charge_upper_limit"] = str(
+                    paramData.get("charge_upper_limit", "")
+                )
+                station["discharge_lower_limit"] = str(
+                    paramData.get("discharge_lower_limit", "")
+                )
+                station["backup_reserve"] = str(paramData.get("backup_reserve", ""))
+                station["backup_reserve_switch"] = bool(
+                    paramData.get("backup_reserve_switch", "")
                 )
                 self._update_dev(station)
     return data
@@ -1914,11 +1934,7 @@ async def set_sb2_home_load(  # noqa: C901
                         )
                     # adjust charging type
                     if charging_type is not None:
-                        slot.update(
-                            {
-                                "charging_type": int(charging_type)
-                            }
-                        )
+                        slot.update({"charging_type": int(charging_type)})
                     # clear flag for pending parameter update for actual time
                     if start_time <= now_time < end_time:
                         pending_now_update = False
