@@ -158,7 +158,7 @@ class DeviceHexDataField:
             self.f_length = int.from_bytes(hexbytes[1:3], byteorder="little")
             if (
                 hexbytes[3:4] == DeviceHexDataTypes.str.value
-                and 255 < self.f_length <= len(hexbytes) - 4
+                and 3 < self.f_length <= len(hexbytes) - 4
             ):
                 try:
                     # try string decoding
@@ -331,7 +331,7 @@ class DeviceHexDataField:
                 sile = ""
                 fle = ""
                 dle = ""
-            s = f"{Color.RED}{self.f_name.hex()!s:<2}{Color.OFF} {self.f_length.to_bytes(length=(self.f_length.bit_length() + 7) // 8, byteorder='little').hex():>4} "
+            s = f"{Color.RED}{self.f_name.hex()!s:<2}{Color.OFF} {self.f_length.to_bytes(length=self._len_bytes, byteorder='little').hex():>4} "
             s += f"{tcol}{(self.f_type.hex().replace('fe', '00') or '--')!s:<4}{Color.OFF}  {self.f_value.hex(':')}\n"
             s += f"{'└->':<3}{self.f_length!s:>4} {tcol}{typ!s:<5}{Color.OFF} "
             s += f"{tcol if typ in [DeviceHexDataTypes.ui.name, DeviceHexDataTypes.str.name] else ''}{uile:>15}{Color.OFF if typ in [DeviceHexDataTypes.ui.name, DeviceHexDataTypes.str.name] else ''} "
@@ -1037,7 +1037,8 @@ class DeviceJsonData:
         if self.hexbytes:
             self.length = len(self.hexbytes)
             with contextlib.suppress(UnicodeDecodeError):
-                self.data = json.loads(self.hexbytes.decode())
+                if not self.data:
+                    self.data = json.loads(self.hexbytes.decode())
         else:
             # update length and hexbytes if not initialized via hexbytes
             self._update_hexbytes()
@@ -1059,7 +1060,7 @@ class DeviceJsonData:
     def _update_hexbytes(self) -> None:
         # init hexbytes
         self.hexbytes = bytearray()
-        if not isinstance(self.data, dict):
+        if not isinstance(self.data, dict | list):
             self.data = {}
         if self.data:
             self.hexbytes = bytearray(
@@ -1184,52 +1185,47 @@ class DeviceJsonData:
         nested_fields = []
         list_fields = 0
         isnested = False
-        if fieldmap := self._get_fieldmap():
-            # extract nested json field from mapping for decoding
-            fieldmap = fieldmap.copy().pop("json", fieldmap)
-            if "data" in self.data:
-                # extend fieldmap with field descriptions under type_data map
-                if isinstance(m_type := self.data.get("type"), str):
-                    fieldmap |= fieldmap.copy().pop(f"{m_type}_data", {})
-                else:
-                    fieldmap |= fieldmap.copy().pop("data", {})
-            # search each json key in fieldmap,
-            for i, line in enumerate(lines):
-                # check if nested dict ends
-                if len(nested_fields) > 0 and line.endswith("}"):
-                    nested_fields = nested_fields[:-1]
+        fieldmap = self._get_fieldmap()
+        # extract nested json field from mapping for decoding
+        fieldmap = fieldmap.copy().pop("json", fieldmap)
+        if "data" in self.data:
+            # extend fieldmap with field descriptions under type_data map
+            if isinstance(m_type := self.data.get("type"), str):
+                fieldmap |= fieldmap.copy().pop(f"{m_type}_data", {})
+            else:
+                fieldmap |= fieldmap.copy().pop("data", {})
+        # search each json key in fieldmap,
+        for i, line in enumerate(lines):
+            # check if nested dict ends
+            if len(nested_fields) > 0 and line.endswith("}"):
+                nested_fields = nested_fields[:-1]
+                isnested = len(nested_fields) > 1 or not (nested_fields[-1:] or [""])[
+                    0
+                ].endswith("data")
+            elif line.endswith("]"):
+                list_fields -= 1
+            if key := (line.split('"')[1:2] or [""])[0]:
+                # check if nested dict starts
+                if line.endswith("{"):
+                    nested_fields.append(key)
                     isnested = len(nested_fields) > 1 or not (
                         nested_fields[-1:] or [""]
                     )[0].endswith("data")
-                elif line.endswith("]"):
-                    list_fields -= 1
-                if key := (line.split('"')[1:2] or [""])[0]:
-                    # check if nested dict starts
-                    if line.endswith("{"):
-                        nested_fields.append(key)
-                        isnested = len(nested_fields) > 1 or not (
-                            nested_fields[-1:] or [""]
-                        )[0].endswith("data")
-                    # check if list starts
-                    if (
-                        not isnested
-                        and list_fields <= 0
-                        and (fld := fieldmap.get(key, {}))
-                    ):
-                        value = self.data.get(key)
-                        name = fld.get(NAME) or ""
-                        factor = fld.get(FACTOR) or None
-                        divider = fld.get(VALUE_DIVIDER) or None
-                        if isinstance(value, float | int) and "timestamp" in str(name):
-                            name = f"{name} ({datetime.fromtimestamp(convert_timestamp(value, ms=(isinstance(value, float)))).strftime('%Y-%m-%d %H:%M:%S')})"
-                        if name:
-                            lines[i] = (
-                                f"{line}  {Color.CYAN} --> {name}{('' if factor is None else ' (' + FACTOR + ' ' + str(factor) + ')')}"
-                                f"{('' if divider is None else ' (' + VALUE_DIVIDER + ' ' + str(divider) + ')')}{Color.OFF}"
-                            )
-                if line.endswith("["):
-                    list_fields += 1
-
+                # check if list starts
+                if not isnested and list_fields <= 0 and (fld := fieldmap.get(key, {})):
+                    value = self.data.get(key)
+                    name = fld.get(NAME) or ""
+                    factor = fld.get(FACTOR) or None
+                    divider = fld.get(VALUE_DIVIDER) or None
+                    if isinstance(value, float | int) and "timestamp" in str(name):
+                        name = f"{name} ({datetime.fromtimestamp(convert_timestamp(value, ms=(isinstance(value, float)))).strftime('%Y-%m-%d %H:%M:%S')})"
+                    if name:
+                        lines[i] = (
+                            f"{line}  {Color.CYAN} --> {name}{('' if factor is None else ' (' + FACTOR + ' ' + str(factor) + ')')}"
+                            f"{('' if divider is None else ' (' + VALUE_DIVIDER + ' ' + str(divider) + ')')}{Color.OFF}"
+                        )
+            if line.endswith("["):
+                list_fields += 1
         return "\n".join(lines)
 
     def asdict(self) -> dict:
