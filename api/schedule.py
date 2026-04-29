@@ -76,7 +76,7 @@ async def get_device_load(
         # The home_load_data is provided as string instead of object...Convert into object for proper handling
         # It must be converted back to a string when passing this as input to set home load
         string_data = (resp.get("data") or {}).get("home_load_data") or {}
-        if isinstance(string_data, str):
+        if string_data and isinstance(string_data, str):
             resp["data"].update({"home_load_data": json.loads(string_data)})
         data = resp.get("data") or {}
         # update schedule also for all device serials found in schedule
@@ -225,7 +225,8 @@ async def get_device_parm(
     {"param_data":"{\"AE100\":\"7X297LBE75Z0BU4LE\",
         \"id_img\":\"https://public-aiot-fra-prod.s3.dualstack.eu-central-1.amazonaws.com/anker-power/public/product/2025/06/24/iot-admin/6eBAql2OBqMlGG1W/20250624-201743.png\"}"}
     Example data for provided site_id with param_type 18:
-    {"param_data": {"soc_list": [{"id": 1,"is_selected": 1,"soc": 10},{"id": 2,"is_selected": 0,"soc": 5}],"switch_0w": 0,"enable_0w": 0,"enable_0w_change":false,"feed-in_power_limit":0}
+    {"param_data": {"soc_list": [{"id": 1,"is_selected": 1,"soc": 10},{"id": 2,"is_selected": 0,"soc": 5}],"switch_0w": 0,"enable_0w": 0,"enable_0w_change":false,"feed-in_power_limit":0,
+        "feed_times":null,"charge_upper_limit": 100,"discharge_lower_limit": 0,"backup_reserve": 50,"backup_reserve_switch": 0,"cmd_type": 0}
     Example data for provided site_id with param_type 23:
     {"param_data": "{\"switch\": 0}"}
     Example data for provided site_id with param_type 26:

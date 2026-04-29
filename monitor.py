@@ -58,7 +58,10 @@ from api.apitypes import (  # pylint: disable=no-name-in-module
     SolixWorkingStatus,
 )
 from api.errors import AnkerSolixError  # pylint: disable=no-name-in-module
-from api.helpers import get_enum_name  # pylint: disable=no-name-in-module
+from api.helpers import (  # pylint: disable=no-name-in-module
+    get_enum_name,
+    get_solix_product_code,
+)
 from api.mqtt_device import SolixMqttDevice  # pylint: disable=no-name-in-module
 from api.mqtt_factory import SolixMqttDeviceFactory  # pylint: disable=no-name-in-module
 import common
@@ -379,14 +382,17 @@ class AnkerSolixApiMonitor:
             key = input(
                 f"Enter {Color.CYAN}key{Color.OFF} to be customized in '{Color.YELLOW}{item}{Color.OFF}': "
             )
-            value = json.loads(
+            if value := json.loads(
                 f"{input(f"Enter '{Color.YELLOW}{key}{Color.OFF}' {Color.CYAN}value{Color.OFF} in JSON format: ").replace("'", '"')}"
-            )
-            self.api.customizeCacheId(id=item, key=key, value=value)
-            CONSOLE.info(
-                f"Customized part of {Color.YELLOW}{item}{Color.OFF}:\n"
-                f"{json.dumps(self.api.getCaches().get(item).get('customized') or {}, indent=2)}"
-            )
+                or "{}"
+            ):
+                self.api.customizeCacheId(id=item, key=key, value=value)
+                CONSOLE.info(
+                    f"Customized part of {Color.YELLOW}{item}{Color.OFF}:\n"
+                    f"{json.dumps(self.api.getCaches().get(item).get('customized') or {}, indent=2)}"
+                )
+            else:
+                CONSOLE.info(f"{Color.RED}Invalid value for customization!{Color.OFF}")
             input(f"Hit [{Color.YELLOW}Enter{Color.OFF}] to refresh all data...")
             self.next_dev_refr = 0
             self.next_refr = datetime.now().astimezone()
@@ -712,7 +718,7 @@ class AnkerSolixApiMonitor:
                 f"{'Alias':<{col3}}: {c or Color.MAG}{dev.get('alias', 'Unknown')}{co}"
             )
             CONSOLE.info(
-                f"{'Serialnumber':<{col1}}: {sn:<{col2}} "
+                f"{'Serial [' + (get_solix_product_code(sn) or '----') + ']':<{col1}}: {sn:<{col2}} "
                 f"{'Admin':<{col3}}: {'YES' if admin else 'NO'}"
             )
             if m1 := cm and mqtt.get("local_timestamp", 0):
@@ -832,7 +838,7 @@ class AnkerSolixApiMonitor:
                 if m1 or str(m3):
                     CONSOLE.info(
                         f"{'Min/Backup SoC':<{col1}}: {m1 and (c or cm)}{(m1 or '--')!s:>4}{co} % / "
-                        f"{m3 and (c or cm)}{(str(m3) or dev.get("backup_reserve") or '--')!s:>3} {'%':<{col2 - 13}}{co} "
+                        f"{m3 and (c or cm)}{(str(m3) or dev.get('backup_reserve') or '--')!s:>3} {'%':<{col2 - 13}}{co} "
                         f"{'Grid export':<{col3}}: {'ON' if feat1 else '---' if feat1 is None else 'OFF':>4} (Limit {feat2} W)"
                     )
                 unit = "W"
@@ -911,12 +917,12 @@ class AnkerSolixApiMonitor:
                         f"{'AI Status':<{col1}}: {str(get_enum_name(SolarbankAiemsStatus, status, '-----')).capitalize() + ' (' + str(status) + ')':<{col2}} "
                         f"{'AI Enabled':<{col3}}: {'YES' if aiems.get('enable') else 'NO'}"
                     )
-                site_preset = dev.get("set_system_output_power","")
+                site_preset = dev.get("set_system_output_power", "")
                 if "schedule" in dev or site_preset:
                     CONSOLE.info("." * 80)
                     CONSOLE.info(
                         f"{'Schedule  (Now)':<{col1}}: {datetime.now().astimezone().strftime('%H:%M:%S UTC %z'):<{col2}} "
-                        f"{'System Preset':<{col3}}: {str(site_preset).replace('W', '') or "---":>4} W"
+                        f"{'System Preset':<{col3}}: {str(site_preset).replace('W', '') or '---':>4} W"
                     )
                     if admin:
                         # print schedule
@@ -943,13 +949,16 @@ class AnkerSolixApiMonitor:
                 if m3 := cm and mqtt.get("battery_soh", ""):
                     m3 = f"{float(m3):6.2f}"
                 soc = f"{m1 or dev.get('battery_soc', '---'):>4} %"
-                if dev.get("generation", 0) > 1 or devtype == SolixDeviceType.HOME_BACKUP.value:
+                if (
+                    dev.get("generation", 0) > 1
+                    or devtype == SolixDeviceType.HOME_BACKUP.value
+                ):
                     if m4 := c and mqtt.get("backup_soc", ""):
                         m4 = int(m4)
                     CONSOLE.info(
                         f"{'Battery SoC/SoH':<{col1}}: {m1 and c}{soc} /{m3 and (c or cm)}{m3 or ' --.--':>4} {'%':<{col2 - 15}}{co} "
                         f"{'Min/Backup SoC':<{col3}}: {m2 and c}{m2 or (dev.get('power_cutoff') or dev.get('output_cutoff_data') or '--')!s:>4} %{co} / "
-                        f"{m4 and (c or cm)}{str(m4) or dev.get("backup_reserve") or '--'} %{co}"
+                        f"{m4 and (c or cm)}{str(m4) or dev.get('backup_reserve') or '--'} %{co}"
                     )
                 else:
                     m4 = cm and mqtt.get("temperature", "")
@@ -3503,7 +3512,9 @@ class AnkerSolixApiMonitor:
                                             CONSOLE.info(
                                                 "Select which device should be filtered in output:"
                                             )
-                                            for idx, devicename in enumerate(self.device_names):
+                                            for idx, devicename in enumerate(
+                                                self.device_names
+                                            ):
                                                 CONSOLE.info(
                                                     f"({Color.YELLOW}{idx}{Color.OFF}) {devicename}"
                                                 )
@@ -3513,7 +3524,9 @@ class AnkerSolixApiMonitor:
                                             if (
                                                 selection
                                                 and selection.isdigit()
-                                                and 1 <= int(selection) < len(self.device_names)
+                                                and 1
+                                                <= int(selection)
+                                                < len(self.device_names)
                                             ):
                                                 self.device_filter = self.device_names[
                                                     int(selection)

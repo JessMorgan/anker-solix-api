@@ -68,6 +68,7 @@ from .mqttcmdmap import (
     CMD_USB_PORT_SWITCH,
     COMMAND_LIST,
     COMMAND_NAME,
+    EMBEDDED,
     FACTOR,
     LENGTH,
     MASK,
@@ -173,14 +174,20 @@ _A1725_0405 = {
     # C200 DC param info (A1725/A1727)
     TOPIC: "param_info",
     "a1": {NAME: "device_pn"},  # Device PN identifier
-    "a3": {NAME: "remaining_time_hours", FACTOR: 0.1, SIGNED: False},  # Remaining runtime
+    "a3": {
+        NAME: "remaining_time_hours",
+        FACTOR: 0.1,
+        SIGNED: False,
+    },  # Remaining runtime
     "a4": {NAME: "usbc_1_power"},  # USB-C top output power
     "a5": {NAME: "usbc_2_power"},  # USB-C middle output power
     "a6": {NAME: "usbc_3_power"},  # USB-C bottom input/output power
     "a8": {NAME: "usba_1_power"},  # USB-A top output power
     "a9": {NAME: "usba_2_power"},  # USB-A bottom output power
     "ab": {NAME: "photovoltaic_power"},  # Solar input power (W)
-    "ac": {NAME: "dc_input_power_total"},  # Total input power (solar + C3 input when charging)
+    "ac": {
+        NAME: "dc_input_power_total"
+    },  # Total input power (solar + C3 input when charging)
     "ad": {NAME: "dc_output_power_total"},  # Total USB output power
     "af": {NAME: "battery_soc_ah", FACTOR: 0.001},  # Battery SOC (Ah)
     "b5": {NAME: "temperature", SIGNED: True},  # In Celsius
@@ -188,10 +195,16 @@ _A1725_0405 = {
     "b7": {NAME: "battery_soc"},  # Battery state of charge (%)
     "b8": {NAME: "battery_soh"},  # Battery health
     "b9": {NAME: "usbc_1_status"},  # USB-C1 top status: Inactive (0), Discharging (1)
-    "ba": {NAME: "usbc_2_status"},  # USB-C2 middle status: Inactive (0), Discharging (1)
-    "bb": {NAME: "usbc_3_status"},  # USB-C3 bottom status: Inactive (0), Discharging (1), Charging (2)
+    "ba": {
+        NAME: "usbc_2_status"
+    },  # USB-C2 middle status: Inactive (0), Discharging (1)
+    "bb": {
+        NAME: "usbc_3_status"
+    },  # USB-C3 bottom status: Inactive (0), Discharging (1), Charging (2)
     "bd": {NAME: "usba_1_status"},  # USB-A1 top status: Inactive (0), Discharging (1)
-    "be": {NAME: "usba_2_status"},  # USB-A2 bottom status: Inactive (0), Discharging (1)
+    "be": {
+        NAME: "usba_2_status"
+    },  # USB-A2 bottom status: Inactive (0), Discharging (1)
     "c3": {NAME: "device_sn"},
     "c4": {
         NAME: "device_timeout_minutes"
@@ -200,7 +213,9 @@ _A1725_0405 = {
         NAME: "display_timeout_seconds"
     },  # Display timeout: 20, 30, 60, 300, 1800 seconds
     "c7": {NAME: "display_mode"},  # Brightness: Low (1), Medium (2), High (3)
-    "c9": {NAME: "temp_unit_fahrenheit"},  # Temperature unit: Celsius (0), Fahrenheit (1)
+    "c9": {
+        NAME: "temp_unit_fahrenheit"
+    },  # Temperature unit: Celsius (0), Fahrenheit (1)
     "ca": {NAME: "display_switch"},  # Off (0) or On (1)
     "cd": {NAME: "charging_status"},  # Inactive (0), Solar (1)
     "fe": {NAME: "msg_timestamp"},  # Message timestamp
@@ -3838,8 +3853,8 @@ _X1_JSON = {
         "b2ge": {NAME: "grid_discharged_today", FACTOR: 0.001},  # 40.09 Wh
         "g2be": {NAME: "grid_charged_today", FACTOR: 0.001},  # 0 Wh
         "g2le": {NAME: "grid_consumption_today", FACTOR: 0.001},  # 54 Wh
-        "fge": {NAME: "grid_export_today", FACTOR: 0.001},
-        "tge": {NAME: "grid_import_today", FACTOR: 0.001},
+        "fge": {NAME: "grid_import_today", FACTOR: 0.001},
+        "tge": {NAME: "grid_export_today", FACTOR: 0.001},
         "le": {NAME: "home_consumption_today", FACTOR: 0.001},  # 13241.26 Wh
         "de": {NAME: "generator_energy_today", FACTOR: 0.001},
         "d2be": {NAME: "generator_charged_today", FACTOR: 0.001},
@@ -3873,10 +3888,28 @@ _X1_JSON = {
 _PP_JSON = {
     "localtime": {NAME: "local_datetime"},
     "data": {
+        "sn": {NAME: "device_sn"},
+        "b1sn": {NAME: "device_sn"},
+        "wf": {NAME: "wifi_name"},
+        "mv": {NAME: "sw_version"},  # v1.5.7
+        "mdv": {NAME: "hw_version"},  # v0.2.3.1
+        "90asn": {NAME: "device_1_sn"},
+        "ppsapn": {NAME: "device_1_pn"},
+        "90av": {NAME: "device_1_sw_version"},  # "v3.5.6"
+        "90as": {NAME: "device_1_status"},  # 2
+        "90asoc": {NAME: "device_1_soc"},  # 15
+        "90bsn": {NAME: "device_2_sn"},
+        "ppsbpn": {NAME: "device_2_pn"},
+        "90bv": {NAME: "device_2_sw_version"},  # "v3.5.6"
+        "90bs": {NAME: "device_2_status"},  # 2
+        "90bsoc": {NAME: "device_2_soc"},  # 16
         # power values
+        "mcp": {NAME: "max_charge_power"},  # 8000 W
         "b2lp": {NAME: "battery_to_home_power"},  # 0 W
         "b2gp": {NAME: "battery_to_grid_power"},  # 0 W
         "bp": {NAME: "battery_power_signed", FACTOR: -1},  # -2296 W = charging
+        "bcp": {NAME: "bat_charge_power", FACTOR: -1},  # -226 W = charging
+        "bdcp": {NAME: "bat_discharge_power"},  # 111 W
         "pp": {NAME: "photovoltaic_power"},  # 0 W
         "p2lp": {NAME: "pv_to_home_power"},  # 0 W
         "p2bp": {NAME: "pv_to_battery_power"},  # 0 W
@@ -3884,12 +3917,19 @@ _PP_JSON = {
         "gp": {NAME: "grid_power_signed"},  # 3705 W
         "g2bp": {NAME: "grid_to_battery_power"},  # 2296 W
         "g2lp": {NAME: "grid_to_home_power"},  # 1409 W
-        "lp": {NAME: "home_demand"},  # 1409 W
+        "lp": {NAME: "home_load"},  # 1409 W
         "mpp": {NAME: "micro_inverter_power"},  # 0 W
+        "op": {NAME: "other_power"},  # 0 W
+        "o2lp": {NAME: "other_to_home_power"},  # 0 W
+        "o2pp": {NAME: "other_to_pv_power?"},  # 0 W
+        "gmp": {NAME: "max_load_power?"},  # 4800 W
+        # disaster protection
+        "dpp": {NAME: "disaster_protection_plan_{x}"},  # list with mappings
+        "dps": {NAME: "disaster_protection_status?"},  # 0
         # status
-        "ws": {NAME: "working_status"},  # 0 = standby, 1 = running
+        "ws": {NAME: "working_status?"},  # 0 = standby, 1 = running
         "m": {NAME: "mode"},  # (0 = off, 1 = on, 2 = auto)
-        "gs": {NAME: "grid_status"},  # (0 = offline, 1 = online)
+        "gs": {NAME: "grid_status?"},  # (0 = offline, 1 = online)
         "bs": {  # 0: Standby; 1: Charging; 2: Discharging
             NAME: "battery_status"
         },
@@ -3898,17 +3938,42 @@ _PP_JSON = {
         },
         "soc": {NAME: "battery_soc"},  # 62 %
         "b1t": {NAME: "battery_1_temperature"},
-        "bc": {NAME: "pps_count"},  # 2
+        "bc": {NAME: "pps_count?"},  # 2
+        "90s": {NAME: "pps_count"},  # 2
         "bds": {
-            NAME: "pps_{x}_data"
+            NAME: "device_{x}_data"
         },  # list with PPS data dict, eg {"sn": <pps_sn>,"soc":61,"power":-1148,"error":0}
-        "cp": {NAME: "charge_target_soc?"},  # %
+        "cp": {NAME: "battery_soc_total?"},  # %
         "pu": {NAME: "power_usage_mode?"},
         "mps": {NAME: "micro_power_setting?"},
-        "tu": {NAME: "msg_timestamp?"},
-        "tgp": {NAME: "grid_power_signed?"},
-        "tlp": {NAME: "home_demand?"},
-        "tpp": {NAME: "pv_power?"},
+        "tpp": {NAME: "pv_power_total?"},  # 3045970
+        "tgp": {NAME: "grid_power_signed_total?"},  # 3045970
+        "tlp": {NAME: "home_load_total?"},  # 50620729
+        "tsp": {NAME: "battery_power_total?"},  # 50620729
+        # daily energies in Wh?
+        "pe": {NAME: "pv_yield_today", FACTOR: 0.001},  # 6293 Wh
+        "p2le": {NAME: "pv_consumption_today", FACTOR: 0.001},  # 4771 Wh
+        "p2be": {NAME: "pv_charge_today", FACTOR: 0.001},  # 1522 Wh
+        "p2ge": {NAME: "pv_export_today", FACTOR: 0.001},  # 24.98 Wh
+        "bdce": {NAME: "charged_energy_today", FACTOR: 0.001},  # 2853 Wh
+        "bdde": {NAME: "discharged_energy_today", FACTOR: 0.001},  # 11794 Wh
+        "b2le": {NAME: "battery_consumption_today", FACTOR: 0.001},  # 11794 Wh
+        "b2ge": {NAME: "grid_discharged_today", FACTOR: 0.001},  # 40.09 Wh
+        "g2be": {NAME: "grid_charged_today", FACTOR: 0.001},  # 1331 Wh
+        "g2le": {NAME: "grid_consumption_today", FACTOR: 0.001},  # 87889 Wh
+        "fge": {NAME: "grid_import_today", FACTOR: 0.001},  # 89220 Wh
+        "tge": {NAME: "grid_export_today", FACTOR: 0.001},  # 3 Wh
+        "le": {NAME: "home_consumption_today", FACTOR: 0.001},  # 104452 Wh
+        "de": {NAME: "generator_energy_today", FACTOR: 0.001},
+        "d2be": {NAME: "generator_charged_today", FACTOR: 0.001},
+        "d2le": {NAME: "generator_consumed_today", FACTOR: 0.001},
+        "o2le": {NAME: "other_consumption_today", FACTOR: 0.001},
+        "o2pe": {NAME: "other_pv_yield_today", FACTOR: 0.001},
+        "oe": {NAME: "other_energy_today", FACTOR: 0.001},
+        # aggregated energies in Wh?
+        "pae": {NAME: "pv_yield", FACTOR: 0.001},  # 3045970 Wh
+        "bac": {NAME: "charged_energy", FACTOR: 0.001},  # 12286143 Wh
+        "bad": {NAME: "discharged_energy", FACTOR: 0.001},  # 8033557 Wh
     },
 }
 
@@ -5044,7 +5109,6 @@ SOLIXMQTTMAP: Final[dict] = {
         # Interval: ~300 seconds
         "0500": _DOCK_0500,
     },
-
     # Power Cooler Everfrost 2 40L
     "A17A4": {
         # Interval: Irregular, triggered on app actions, no fixed interval
@@ -5057,7 +5121,6 @@ SOLIXMQTTMAP: Final[dict] = {
             "a6": {NAME: "setting_0889_a6"},
         },
     },
-
     # Prime Charger 250W
     "A2345": {
         "0200": CMD_STATUS_REQUEST,  # Device status request for message 0a00
@@ -5420,10 +5483,28 @@ SOLIXMQTTMAP: Final[dict] = {
     "A17B1": {
         "0057": CMD_REALTIME_TRIGGER,  # for regular status messages
         # Interval: unknown?
+        "0500": {
+            "a2": {
+                "json": _PP_JSON,
+            }
+        },
+        "0502": {
+            "a2": {
+                "json": _PP_JSON,
+            }
+        },
+        "0503": {
+            "a2": {
+                "json": _PP_JSON,
+            }
+        },
         "0505": {
             "a2": {
                 "json": _PP_JSON,
             }
+        },
+        "0601": {
+            EMBEDDED: "tlv",  # Name of field with embedded hexdata
         },
     },
     # HES X1
