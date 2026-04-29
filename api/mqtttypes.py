@@ -155,33 +155,64 @@ class DeviceHexDataField:
             hexbytes = bytearray(hexbytes)
         if isinstance(hexbytes, bytearray) and len(hexbytes) >= 2:
             self.f_name = hexbytes[0:1]
-            # test if 2 byte LE length for str fields
+            # test if 2 byte LE length for str or bin fields
             self.f_length = int.from_bytes(hexbytes[1:3], byteorder="little")
             if (
-                hexbytes[3:4] == DeviceHexDataTypes.str.value
+                hexbytes[3:4]
+                in [DeviceHexDataTypes.str.value, DeviceHexDataTypes.bin.value]
                 and 3 < self.f_length <= len(hexbytes) - 4
             ):
-                try:
-                    # try string decoding
-                    hexbytes[4 : 3 + self.f_length].decode()
-                    self._len_bytes = 2
-                except UnicodeDecodeError:
-                    self.f_length = int.from_bytes(hexbytes[1:2])
+                if hexbytes[3:4] == DeviceHexDataTypes.bin.value:
+                    next_byte = hexbytes[3 + self.f_length : 4 + self.f_length]
+                    # next byte must be larger for next field name or last byte
+                    if next_byte and (
+                        len(hexbytes) - self.f_length == 4
+                        or (
+                            next_byte > self.f_name
+                            and len(hexbytes) - self.f_length >= 3
+                        )
+                    ):
+                        self._len_bytes = 2
+                    else:
+                        self.f_length = int.from_bytes(hexbytes[1:2])
+                else:
+                    try:
+                        # try string decoding
+                        hexbytes[4 : 3 + self.f_length].decode()
+                        self._len_bytes = 2
+                    except UnicodeDecodeError:
+                        self.f_length = int.from_bytes(hexbytes[1:2])
             else:
                 self.f_length = int.from_bytes(hexbytes[1:2])
             if 0 < self.f_length <= len(hexbytes) - 2:
-                if self.f_length > 1 and (
-                    bytes(hexbytes[2:3]) < b"10" or self.f_length > 1
+                if (
+                    self.f_length > 1
+                    and bytes(hexbytes[1 + self._len_bytes : 2 + self._len_bytes])
+                    < b"10"
                 ):
                     if self._len_bytes > 1:
                         # 2 byte length with str field
-                        self.f_value = hexbytes[4 : 3 + self.f_length]
                         self.f_type = hexbytes[3:4]
+                        self.f_value = hexbytes[4 : 3 + self.f_length]
                     else:
                         # field with value type
                         self.f_type = hexbytes[2:3]
                         self.f_value = hexbytes[3 : 2 + self.f_length]
                     self._check_json()
+                    # check if str field length is correct or missing last byte
+                    if self.f_type == DeviceHexDataTypes.str.value and (
+                        next_byte := hexbytes[
+                            1 + self._len_bytes + self.f_length : 2
+                            + self._len_bytes
+                            + self.f_length
+                        ]
+                    ):
+                        if next_byte < self.f_name:
+                            # byte is no fieldsname, include in string if decodable
+                            with contextlib.suppress(UnicodeDecodeError):
+                                next_byte.decode()
+                                self.f_length += 1
+                                self.f_value += next_byte
                 else:
                     # field with single byte value
                     self.f_type = bytearray()
@@ -912,6 +943,13 @@ class DeviceHexData:
                             f"{('' if divider is None else ' (' + VALUE_DIVIDER + ' ' + str(divider) + ')')}"
                             f"{('' if signed is None else ' (' + SIGNED + ' ' + str(signed) + ')')}{Color.OFF}"
                         )
+                        if embedded_name:
+                            if f.f_type == DeviceHexDataTypes.str.value:
+                                embedded_json[name] = f.f_value.decode(
+                                    errors="ignore"
+                                ).strip()
+                            elif f.f_type == DeviceHexDataTypes.bin.value:
+                                embedded_json[name] = f.f_value.hex()
                     elif f.json:
                         s += DeviceJsonData(
                             model=self.model,
@@ -923,11 +961,13 @@ class DeviceHexData:
                             embedded_json = f.json
                 # Check if embedded message and decode also the embedded message
                 if embedded_json:
-                    if isinstance(embedded_json,dict):
+                    if isinstance(embedded_json, dict):
                         embedded_json = [embedded_json]
                     for item in embedded_json:
-                        s += f"\n{Color.YELLOW}EMBEDDED MESSAGE DECODING:{Color.OFF}\n"
-                        s += DeviceHexData(model=item.get("type",""),hexbytes=item.get(embedded_name)).decode()
+                        s += f"\n{Color.YELLOW}EMBEDDED MESSAGE DECODING FOR DEVICE: {Color.CYAN}{item.get('sn', '')}{Color.OFF}\n"
+                        s += DeviceHexData(
+                            model=item.get("type", ""), hexbytes=item.get(embedded_name)
+                        ).decode()
                     s += f"\n{Color.YELLOW}END OF EMBEDDED MESSAGE{Color.OFF}"
                 s += f"\n{80 * '-'}"
         else:
@@ -942,6 +982,9 @@ class DeviceHexData:
         """Return a dictionary with extracted values based on defined field mappings."""
         values = {}
         fieldmap = self._get_fieldmap()
+        # skip extraction if embedded message
+        if fieldmap.get(EMBEDDED):
+            return values
         if cmd_list := fieldmap.get(COMMAND_LIST):
             # extract the maps from all nested commands, they should not have duplicate field names
             fieldmap = {

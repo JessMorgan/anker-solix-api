@@ -924,6 +924,10 @@ _A1782_0421 = {
                 NAME: "ac_input_limit_max",  # Max supported charge limit, seems fix
                 TYPE: DeviceHexDataTypes.sile.value,
             },
+            "07": {
+                NAME: "battery_soh?",
+                TYPE: DeviceHexDataTypes.ui.value,
+            },
         }
     },
     "a4": {
@@ -977,6 +981,11 @@ _A1782_0421 = {
                 NAME: "port_memory_switch",  # Output Port Memory switch: Disabled (0) or Enabled (1)
                 TYPE: DeviceHexDataTypes.ui.value,
             },
+            "26": {
+                NAME: "region",
+                TYPE: DeviceHexDataTypes.str.value,
+                LENGTH: 2
+            },
         }
     },
     "a5": {
@@ -988,10 +997,6 @@ _A1782_0421 = {
             },
             "02": {
                 NAME: "battery_soc",
-                TYPE: DeviceHexDataTypes.ui.value,
-            },
-            "03": {
-                NAME: "battery_soh?",
                 TYPE: DeviceHexDataTypes.ui.value,
             },
         }
@@ -1023,7 +1028,7 @@ _A1782_0421 = {
     "a8": {
         BYTES: {
             "00": {
-                NAME: "dc_input_power_switch?",  # ?  Seems to have a value of 1 when the next field has a non-zero value
+                NAME: "dc_input_power_status?",  # ?  Seems to have a value of 1 when the next field has a non-zero value
                 TYPE: DeviceHexDataTypes.ui.value,
             },
             "01": {
@@ -1094,9 +1099,8 @@ _A1782_0421 = {
     },
     "c0": {
         BYTES: {
-            # Expansion battery 1: APC23031F2xxxxxxxx
-            # Embedded: [01][temp_hi][temp_lo][soc_hi][soc_lo]
-            "01": {
+            # Expansion battery 1
+            "00": {
                 NAME: "exp_1_sn",
                 TYPE: DeviceHexDataTypes.str.value,
             },
@@ -1109,13 +1113,16 @@ _A1782_0421 = {
                 NAME: "exp_1_soc",  # State of charge 0-100%
                 TYPE: DeviceHexDataTypes.ui.value,
             },
+            "32": {
+                NAME: "exp_1_type",  # type identifier
+                TYPE: DeviceHexDataTypes.str.value,
+            },
         }
     },
     "c1": {
         BYTES: {
-            # Expansion battery 2: APC23031F1xxxxxxxx
-            # Embedded: [01][temp_hi][temp_lo][soc_hi][soc_lo]
-            "01": {
+            # Expansion battery 2
+            "00": {
                 NAME: "exp_2_sn",
                 TYPE: DeviceHexDataTypes.str.value,
             },
@@ -1127,6 +1134,32 @@ _A1782_0421 = {
             "25": {
                 NAME: "exp_2_soc",  # State of charge 0-100%
                 TYPE: DeviceHexDataTypes.ui.value,
+            },
+            "32": {
+                NAME: "exp_2_type",  # type identifier
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+        }
+    },
+    "c2": {
+        BYTES: {
+            # Expansion battery 3
+            "00": {
+                NAME: "exp_3_sn",
+                TYPE: DeviceHexDataTypes.str.value,
+            },
+            "23": {
+                NAME: "exp_3_temperature",  # Temperature in °C (signed)
+                TYPE: DeviceHexDataTypes.ui.value,
+                SIGNED: True,
+            },
+            "25": {
+                NAME: "exp_3_soc",  # State of charge 0-100%
+                TYPE: DeviceHexDataTypes.ui.value,
+            },
+            "32": {
+                NAME: "exp_3_type",  # type identifier
+                TYPE: DeviceHexDataTypes.str.value,
             },
         }
     },
@@ -4475,6 +4508,7 @@ SOLIXMQTTMAP: Final[dict] = {
                     STATE_NAME: "ac_input_limit",
                     VALUE_MIN: 200,
                     VALUE_MAX: 1800,
+                    VALUE_MAX_STATE: "ac_input_limit_max",
                     VALUE_STEP: 100,
                 },
             },
@@ -4518,7 +4552,7 @@ SOLIXMQTTMAP: Final[dict] = {
             SolixMqttCommands.dc_12v_output_mode_select: CMD_COMMON_V2
             | {
                 "a4": {
-                    NAME: "set_dc_12v_output_mode",  # Normal (0), Smart (0)
+                    NAME: "set_dc_12v_output_mode",  # Normal (0), Smart (1)
                     TYPE: DeviceHexDataTypes.ui.value,
                     STATE_NAME: "dc_12v_output_mode",
                     VALUE_OPTIONS: {"normal": 0, "smart": 1},
@@ -4596,6 +4630,12 @@ SOLIXMQTTMAP: Final[dict] = {
             # ab = min_soc: 1, 5, 10, 15, 20 %
         },
         # Interval: ~3-5 seconds, but only with realtime trigger
+        "0407": {
+            "a2": {NAME: "device_sn"},
+            "a3": {NAME: "wifi_name"},
+            "a4": {NAME: "wifi_signal?"}, # %
+            "a6": {NAME: "ac_input_limit?"},
+        },
         "0421": _A1782_0421,
         "0502": _A1782_0502,
         # Upon request, followed by 0100 status request command
@@ -4989,6 +5029,12 @@ SOLIXMQTTMAP: Final[dict] = {
     "AX170": {
         "0057": CMD_REALTIME_TRIGGER,  # for regular status messages 0405 etc
         "0405": _AX170_0405,
+        "0666": {
+            EMBEDDED: "tlv",  # Name of field with embedded hexdata
+            "a2": {NAME: "sn"},
+            "a3": {NAME: "type"},
+            "a4": {NAME: "tlv"},
+        },
     },
     # Anker Solarbank Smartmeter
     "A17X7": {
