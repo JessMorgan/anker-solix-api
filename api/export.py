@@ -1729,13 +1729,15 @@ class AnkerSolixApiExport:
                 if code := get_solix_product_code(val):
                     randomstr = "".join(
                         [
-                            random.choices(string.ascii_uppercase + string.digits, k=3),
+                            *random.choices(
+                                string.ascii_uppercase + string.digits, k=3
+                            ),
                             code,
-                            random.choices(
+                            *random.choices(
                                 string.ascii_uppercase + string.digits,
                                 k=len(val) - len(code) - 3,
                             ),
-                        ]
+                        ],
                     )
                 else:
                     randomstr = "".join(
