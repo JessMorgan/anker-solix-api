@@ -68,6 +68,7 @@ from .mqttcmdmap import (
     CMD_USB_PORT_SWITCH,
     COMMAND_LIST,
     COMMAND_NAME,
+    EMBEDDED,
     FACTOR,
     LENGTH,
     MASK,
@@ -3857,8 +3858,8 @@ _PP_JSON = {
         "sn": {NAME: "device_sn"},
         "b1sn": {NAME: "device_sn"},
         "wf": {NAME: "wifi_name"},
-        "mv":  {NAME: "sw_version"}, # v1.5.7
-        "mdv":  {NAME: "hw_version"}, # v0.2.3.1
+        "mv": {NAME: "sw_version"},  # v1.5.7
+        "mdv": {NAME: "hw_version"},  # v0.2.3.1
         "90asn": {NAME: "device_1_sn"},
         "ppsapn": {NAME: "device_1_pn"},
         "90av": {NAME: "device_1_sw_version"},  # "v3.5.6"
@@ -5312,6 +5313,9 @@ SOLIXMQTTMAP: Final[dict] = {
             "a2": {
                 "json": _PP_JSON,
             }
+        },
+        "0601": {
+            EMBEDDED: "tlv",  # Name of field with embedded hexdata
         },
     },
     # HES X1

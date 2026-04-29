@@ -12,6 +12,7 @@ from .helpers import round_by_factor
 from .mqttcmdmap import (
     BYTES,
     COMMAND_LIST,
+    EMBEDDED,
     FACTOR,
     LENGTH,
     NAME,
@@ -878,6 +879,8 @@ class DeviceHexData:
             if self.msg_fields:
                 s += f"\n{'Fld':<3}{'Len':>4} {'Type':<5} {'uIntLe/var':>15} {'sIntLe':>15} {'floatLe':>15} {'dblLe/4int':>15}"
                 fieldmap = self._get_fieldmap()
+                embedded_name = fieldmap.get(EMBEDDED)
+                embedded_json = {}
                 if cmd_list := fieldmap.get(COMMAND_LIST):
                     # extract the maps from all nested commands, they should not have duplicate field names
                     fieldmap = {
@@ -916,6 +919,16 @@ class DeviceHexData:
                             fieldname=f.f_name,
                             data=f.json,
                         ).decode_fields()
+                        if embedded_name:
+                            embedded_json = f.json
+                # Check if embedded message and decode also the embedded message
+                if embedded_json:
+                    if isinstance(embedded_json,dict):
+                        embedded_json = [embedded_json]
+                    for item in embedded_json:
+                        s += f"\n{Color.YELLOW}EMBEDDED MESSAGE DECODING:{Color.OFF}\n"
+                        s += DeviceHexData(model=item.get("type",""),hexbytes=item.get(embedded_name)).decode()
+                    s += f"\n{Color.YELLOW}END OF EMBEDDED MESSAGE{Color.OFF}"
                 s += f"\n{80 * '-'}"
         else:
             s = ""
