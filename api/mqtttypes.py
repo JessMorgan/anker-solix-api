@@ -1296,6 +1296,9 @@ class DeviceJsonData:
     def extract_values(self, data: dict, fieldmap: dict) -> dict[str, Any]:
         """Get described json values in fieldmap from provided data."""
         values = {}
+        # skip extraction if embedded message
+        if fieldmap.get(EMBEDDED):
+            return values
         if isinstance(data, dict) and isinstance(fieldmap, dict):
             # get map
             for key, value in [
